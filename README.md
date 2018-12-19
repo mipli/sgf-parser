@@ -3,9 +3,10 @@
 
 # SGF Parser
 
-An SGF Parser for Rust.
+A [SGF](https://www.red-bean.com/sgf/index.html) Parser for Rust.
 
 Very rudimentary implementation for now, but supports most SGF properties and simple tree branching.
+
 
 ## Usage
 
