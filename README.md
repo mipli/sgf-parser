@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/mipli/sgf-parser.svg?branch=master)](https://travis-ci.com/mipli/sgf-parser)
+[![Crate](https://img.shields.io/crates/v/sgf-parser.svg)](https://crates.io/crates/sgf-parser)
+
 # SGF Parser
 
 An SGF Parser for Rust.
