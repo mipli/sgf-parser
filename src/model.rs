@@ -51,11 +51,11 @@ pub enum SgfToken {
 #[derive(Debug, PartialEq)]
 pub struct SgfNode {
     pub tokens: Vec<SgfToken>,
-    pub children: Vec<Box<SgfNode>>,
+    pub children: Vec<SgfNode>,
 }
 
 /// Root game Tree
 #[derive(Debug, PartialEq)]
 pub struct SgfGameTree {
-    pub root: Box<SgfNode>,
+    pub root: SgfNode,
 }

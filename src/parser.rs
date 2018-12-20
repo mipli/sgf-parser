@@ -174,66 +174,45 @@ do_parse!(
 named!(parse_node(CompleteStr) -> SgfNode,
 do_parse!(
     tag!(";") >>
-    node: parse_sgf_node >>
-    (node)
+    tokens: many1!(parse_token) >>
+    (SgfNode {
+        tokens,
+        children: vec![],
+    })
 ));
 
 named!(parse_game_tree(CompleteStr) -> SgfGameTree,
-delimited!(tag!("("), call!(parse_game_tree_nodes), tag!(")"))
-);
+do_parse!(
+    root: delimited!(tag!("("), call!(parse_sgf_nodes), tag!(")")) >>
+    (SgfGameTree {
+        root
+    })
+));
 
 named!(parse_game_trees(CompleteStr) -> Vec<SgfGameTree>,
-    many0!(parse_game_tree)
+    many1!(parse_game_tree)
 );
 
-named!(parse_tokens(CompleteStr) -> Vec<SgfToken>,
-    many0!(parse_token)
-);
-
-fn parse_game_tree_nodes(
-    input: CompleteStr,
-) -> Result<(CompleteStr, SgfGameTree), nom::Err<CompleteStr>> {
-    let (remainder, root) = parse_sgf_node_2(input)?;
-    Ok((
-        remainder,
-        SgfGameTree {
-            root: Box::new(root),
-        },
-    ))
-}
-
-fn parse_sgf_node_2(input: CompleteStr) -> Result<(CompleteStr, SgfNode), nom::Err<CompleteStr>> {
+fn parse_sgf_nodes(input: CompleteStr) -> Result<(CompleteStr, SgfNode), nom::Err<CompleteStr>> {
     let (output, mut node) = parse_node(input)?;
-    let mut remainder = match parse_sgf_node_2(output) {
+    let remainder = match parse_sgf_nodes(output) {
         Ok((rem, child)) => {
-            node.children.push(Box::new(child));
+            node.children.push(child);
             rem
         }
         _ => output,
     };
-    match parse_game_trees(remainder) {
+    let remainder = match parse_game_trees(remainder) {
         Ok((rem, mut trees)) => {
-            trees.reverse();
-            while let Some(tree) = trees.pop() {
+            trees.drain(0..).for_each(|tree| { 
                 node.children.push(tree.root);
-            }
-            remainder = rem;
+            });
+            rem
         }
-        _ => {}
-    }
+        _ => remainder
+    };
 
     Ok((remainder, node))
-}
-
-fn parse_sgf_node(input: CompleteStr) -> Result<(CompleteStr, SgfNode), nom::Err<CompleteStr>> {
-    let (remainder, tokens) = parse_tokens(input)?;
-    Ok((
-        remainder,
-        SgfNode {
-            tokens,
-            children: vec![],
-        },
-    ))
 }
 
 ///
@@ -245,4 +224,3 @@ pub fn parse(input: &str) -> Result<SgfGameTree, ()> {
         _ => Err(())
     }
 }
-

@@ -7,12 +7,12 @@ mod tests {
         assert_eq!(
             parse("(;KM[6.5])"),
             Ok(SgfGameTree {
-                root: Box::new(SgfNode {
+                root: SgfNode {
                     tokens: vec![
                         SgfToken::Komi(6.5f32)
                     ],
                     children: vec![]
-                    })
+                    }
                 })
         );
     }
@@ -22,7 +22,7 @@ mod tests {
         assert_eq!(
             parse("(;B[dc]BL[3498])"),
             Ok(SgfGameTree {
-                root: Box::new(SgfNode {
+                root: SgfNode {
                     tokens: vec![
                         SgfToken::Move(Move {
                             stone: Stone::Black,
@@ -34,7 +34,7 @@ mod tests {
                         })
                     ],
                     children: vec![]
-                })
+                }
             })
         );
     }
@@ -44,19 +44,19 @@ mod tests {
         assert_eq!(
             parse("(;B[dc];W[ef])"),
             Ok(SgfGameTree {
-                root: Box::new(SgfNode {
+                root: SgfNode {
                     tokens: vec![SgfToken::Move(Move {
                         stone: Stone::Black,
                         coordinate: (4, 3)
                     })],
-                    children: vec![Box::new(SgfNode {
+                    children: vec![SgfNode {
                         tokens: vec![SgfToken::Move(Move {
                             stone: Stone::White,
                             coordinate: (5, 6)
                         })],
                         children: vec![]
-                    })]
-                })
+                    }]
+                }
             })
         );
     }
@@ -66,28 +66,28 @@ mod tests {
         assert_eq!(
             parse("(;B[aa](;W[bb])(;W[cc]))"),
             Ok(SgfGameTree {
-                root: Box::new(SgfNode {
+                root: SgfNode {
                     tokens: vec![SgfToken::Move(Move {
                         stone: Stone::Black,
                         coordinate: (1, 1)
                     })],
                     children: vec![
-                        Box::new(SgfNode {
+                        SgfNode {
                             tokens: vec![SgfToken::Move(Move {
                                 stone: Stone::White,
                                 coordinate: (2, 2)
                             })],
                             children: vec![]
-                        }),
-                        Box::new(SgfNode {
+                        },
+                        SgfNode {
                             tokens: vec![SgfToken::Move(Move {
                                 stone: Stone::White,
                                 coordinate: (3, 3)
                             })],
                             children: vec![]
-                        })
+                        }
                     ]
-                })
+                }
             })
         );
     }
@@ -97,7 +97,7 @@ mod tests {
         assert_eq!(
             parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])"),
             Ok(SgfGameTree {
-                root: Box::new(SgfNode {
+                root: SgfNode {
                     tokens: vec![
                         SgfToken::Event("event".to_string()),
                         SgfToken::PlayerName(Player {
@@ -110,14 +110,14 @@ mod tests {
                         }),
                         SgfToken::Comment("comment".to_string()),
                     ],
-                    children: vec![Box::new(SgfNode {
+                    children: vec![SgfNode {
                         tokens: vec![SgfToken::Move(Move {
                             stone: Stone::Black,
                             coordinate: (1, 1)
                         })],
                         children: vec![]
-                    })]
-                })
+                    }]
+                }
             })
         );
     }
