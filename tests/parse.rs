@@ -121,4 +121,29 @@ mod tests {
             })
         );
     }
+
+    #[test]
+    fn can_parse_unkown_tags() {
+        assert_eq!(
+            parse("(;B[dc];FO[asdf];W[ef])"),
+            Ok(SgfGameTree {
+                root: SgfNode {
+                    tokens: vec![SgfToken::Move(Move {
+                        stone: Stone::Black,
+                        coordinate: (4, 3)
+                    })],
+                    children: vec![SgfNode {
+                        tokens: vec![SgfToken::Unknown("FO[asdf]".to_string())],
+                        children: vec![SgfNode {
+                            tokens: vec![SgfToken::Move(Move {
+                                stone: Stone::White,
+                                coordinate: (5, 6)
+                            })],
+                            children: vec![]
+                        }]
+                    }]
+                }
+            })
+        );
+    }
 }

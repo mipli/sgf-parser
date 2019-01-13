@@ -45,6 +45,7 @@ pub enum SgfToken {
     Size(u32),
     TimeLimit(u32),
     Comment(String),
+    Unknown(String)
 }
 
 /// A SGF Node, with information about the node and all possible children

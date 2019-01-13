@@ -167,9 +167,28 @@ do_parse!(
         parse_white_time |
         parse_white_name |
         parse_white_rank |
-        parse_komi) >>
+        parse_komi |
+        parse_unknown ) >>
     (token)
 ));
+
+
+named!(parse_unknown(CompleteStr) -> SgfToken,
+do_parse!(
+    name: dbg!(recognize!(take_while!(tag_name_matcher))) >>
+    tag!("[") >>
+    value: dbg!(recognize!(take_while!(tag_value_matcher))) >>
+    tag!("]") >>
+    (SgfToken::Unknown(format!("{}[{}]", name.to_string(), value.to_string())))
+));
+
+fn tag_name_matcher(c: char) -> bool {
+    c.is_alphabetic()
+}
+
+fn tag_value_matcher(c: char) -> bool {
+    c != ']'
+}
 
 named!(parse_node(CompleteStr) -> SgfNode,
 do_parse!(
