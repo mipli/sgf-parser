@@ -52,6 +52,7 @@ pub enum SgfToken {
 #[derive(Debug, PartialEq)]
 pub struct SgfNode {
     pub tokens: Vec<SgfToken>,
+    pub invalid: Vec<SgfToken>,
     pub children: Vec<SgfNode>,
 }
 

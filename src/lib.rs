@@ -1,3 +1,5 @@
+#![feature(drain_filter)]
+
 //! # SGF Parser for Rust
 //!
 //! A sgf parser for rust, using `nom`. 

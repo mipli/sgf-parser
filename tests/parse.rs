@@ -11,6 +11,7 @@ mod tests {
                     tokens: vec![
                         SgfToken::Komi(6.5f32)
                     ],
+                    invalid: vec![],
                     children: vec![]
                     }
                 })
@@ -33,6 +34,7 @@ mod tests {
                             time: 3498
                         })
                     ],
+                    invalid: vec![],
                     children: vec![]
                 }
             })
@@ -49,11 +51,13 @@ mod tests {
                         stone: Stone::Black,
                         coordinate: (4, 3)
                     })],
+                    invalid: vec![],
                     children: vec![SgfNode {
                         tokens: vec![SgfToken::Move(Move {
                             stone: Stone::White,
                             coordinate: (5, 6)
                         })],
+                        invalid: vec![],
                         children: vec![]
                     }]
                 }
@@ -71,12 +75,14 @@ mod tests {
                         stone: Stone::Black,
                         coordinate: (1, 1)
                     })],
+                    invalid: vec![],
                     children: vec![
                         SgfNode {
                             tokens: vec![SgfToken::Move(Move {
                                 stone: Stone::White,
                                 coordinate: (2, 2)
                             })],
+                            invalid: vec![],
                             children: vec![]
                         },
                         SgfNode {
@@ -84,6 +90,7 @@ mod tests {
                                 stone: Stone::White,
                                 coordinate: (3, 3)
                             })],
+                            invalid: vec![],
                             children: vec![]
                         }
                     ]
@@ -110,11 +117,13 @@ mod tests {
                         }),
                         SgfToken::Comment("comment".to_string()),
                     ],
+                    invalid: vec![],
                     children: vec![SgfNode {
                         tokens: vec![SgfToken::Move(Move {
                             stone: Stone::Black,
                             coordinate: (1, 1)
                         })],
+                        invalid: vec![],
                         children: vec![]
                     }]
                 }
@@ -132,13 +141,16 @@ mod tests {
                         stone: Stone::Black,
                         coordinate: (4, 3)
                     })],
+                    invalid: vec![],
                     children: vec![SgfNode {
-                        tokens: vec![SgfToken::Unknown("FO[asdf]".to_string())],
+                        tokens: vec![],
+                        invalid: vec![SgfToken::Unknown("FO[asdf]".to_string())],
                         children: vec![SgfNode {
                             tokens: vec![SgfToken::Move(Move {
                                 stone: Stone::White,
                                 coordinate: (5, 6)
                             })],
+                            invalid: vec![],
                             children: vec![]
                         }]
                     }]

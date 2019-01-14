@@ -196,6 +196,7 @@ do_parse!(
     tokens: many1!(parse_token) >>
     (SgfNode {
         tokens,
+        invalid: vec![],
         children: vec![],
     })
 ));
@@ -214,6 +215,13 @@ named!(parse_game_trees(CompleteStr) -> Vec<SgfGameTree>,
 
 fn parse_sgf_nodes(input: CompleteStr) -> Result<(CompleteStr, SgfNode), nom::Err<CompleteStr>> {
     let (output, mut node) = parse_node(input)?;
+    let invalid = node.tokens.drain_filter(|t| {
+        match t {
+            SgfToken::Unknown(_) => true,
+            _ => false
+        }
+    }).collect::<Vec<_>>();
+    node.invalid = invalid;
     let remainder = match parse_sgf_nodes(output) {
         Ok((rem, child)) => {
             node.children.push(child);
