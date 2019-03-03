@@ -11,3 +11,5 @@ keywords = ["parser", "sgf", "go", "baduk", "weiqi"]
 
 [dependencies]
 nom = "4.1.1"
+pest = "*"
+pest_derive = "*"

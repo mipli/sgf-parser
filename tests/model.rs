@@ -2,6 +2,7 @@
 mod tests {
     use sgf_parser::*;
 
+    /*
     #[test]
     fn can_iterate_over_simple_tree() {
         let tree: SgfGameTree = parse("(;B[dc];W[ef])").unwrap();
@@ -21,4 +22,5 @@ mod tests {
         )], &vec![])));
         assert_eq!(iter.next(), None);
     }
+    */
 }

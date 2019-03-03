@@ -20,7 +20,7 @@
 //! ```rust
 //! use sgf_parser::*;
 //!
-//! let tree: SgfGameTree = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])").unwrap();
+//! let tree: GameTree = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])").unwrap();
 //! ```
 
 #[macro_use]

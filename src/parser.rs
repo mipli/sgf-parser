@@ -1,253 +1,169 @@
-use nom::types::CompleteStr;
-use std::str::FromStr;
+use pest::{Parser};
+
+use pest_derive::*;
+use pest::iterators::Pair;
 
 use crate::*;
 
-#[allow(dead_code)]
-fn str_to_coordinates(input: CompleteStr) -> Result<(u8, u8), std::string::ParseError> {
-    if input.len() != 2 {
-        return Ok((5, 5));
-    }
-    let coords = input
-        .to_lowercase()
-        .as_bytes()
-        .iter()
-        .map(convert_u8_to_coordinate)
-        .take(2)
-        .collect::<Vec<_>>();
-    Ok((coords[0], coords[1]))
-}
+#[derive(Parser)]
+#[grammar = "/home/michael/code/rust/sgf-parser/parser.pest"]
+struct SGFParser;
 
-fn convert_u8_to_coordinate(c: &u8) -> u8 {
-    let n = c - 96;
-    if n >= 9 {
-        n - 1
-    } else {
-        n
-    }
-}
-
-#[allow(dead_code)]
-fn str_to_integer(input: CompleteStr) -> Result<u32, std::num::ParseIntError> {
-    input.parse::<u32>()
-}
-
-macro_rules! create_string_parser {
-    ($name:ident, $tag:expr, $token:expr) => {
-        named!($name(CompleteStr) -> SgfToken,
-        do_parse!(
-            tag!($tag) >>
-            value: parse_string_value >>
-            ($token(value.to_string()))
-        ));
-    }
-}
-
-macro_rules! create_f32_parser {
-    ($name:ident, $tag:expr, $token:expr) => {
-        named!($name(CompleteStr) -> SgfToken,
-        do_parse!(
-            tag!($tag) >>
-            value: parse_f32_value >>
-            ($token(value))
-        ));
-    }
-}
-
-macro_rules! create_u32_parser {
-    ($name:ident, $tag:expr, $token:expr) => {
-        named!($name(CompleteStr) -> SgfToken,
-        do_parse!(
-            tag!($tag) >>
-            value: parse_u32_value >>
-            ($token(value))
-        ));
-    }
-}
-
-named!(parse_f32_value(CompleteStr) -> f32,
-delimited!(tag!("["), call!(nom::float), tag!("]"))
-);
-
-named!(parse_u32_value(CompleteStr) -> u32,
-delimited!(tag!("["), map_res!(nom::digit, |CompleteStr(s)| u32::from_str(s)), tag!("]"))
-);
-
-named!(parse_string_value(CompleteStr) -> CompleteStr,
-do_parse!(
-    tag!("[") >>
-    value: take_until_and_consume!("]") >>
-    (value)
-));
-
-create_string_parser!(parse_game_name, "GN", SgfToken::GameName);
-create_string_parser!(parse_copyright, "CP", SgfToken::Copyright);
-create_string_parser!(parse_event, "EV", SgfToken::Event);
-create_string_parser!(parse_date, "DT", SgfToken::Date);
-create_string_parser!(parse_place, "PC", SgfToken::Place);
-create_string_parser!(parse_comment, "C", SgfToken::Comment);
-
-create_f32_parser!(parse_komi, "KM", SgfToken::Komi);
-
-create_u32_parser!(parse_size, "Size", SgfToken::Size);
-create_u32_parser!(parse_time_limit, "TM", SgfToken::TimeLimit);
-
-named!(parse_black_move(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("B") >>
-    data: parse_string_value >>
-    (SgfToken::Move(Move { stone: Stone::Black, coordinate: str_to_coordinates(data).unwrap() }))
-));
-
-named!(parse_black_time(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("BL") >>
-    time: parse_u32_value >>
-    (SgfToken::Time(Time { stone: Stone::Black, time: time }))
-));
-
-named!(parse_black_name(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("PB") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerName(Player { stone: Stone::Black, name: value.to_string() }))
-));
-
-named!(parse_black_rank(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("BR") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerRank(Rank { stone: Stone::Black, rank: value.to_string() }))
-));
-
-named!(parse_white_move(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("W") >>
-    data: parse_string_value >>
-    (SgfToken::Move(Move { stone: Stone::White, coordinate: str_to_coordinates(data).unwrap() }))
-));
-
-named!(parse_white_time(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("WL") >>
-    time: parse_u32_value >>
-    (SgfToken::Time(Time { stone: Stone::White, time: time }))
-));
-
-named!(parse_white_name(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("PW") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerName(Player { stone: Stone::White, name: value.to_string() }))
-));
-
-named!(parse_white_rank(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("WR") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerRank(Rank { stone: Stone::White, rank: value.to_string() }))
-));
-
-named!(parse_token(CompleteStr) -> SgfToken,
-do_parse!(
-    token: alt!(
-        parse_game_name |
-        parse_copyright |
-        parse_event |
-        parse_date |
-        parse_place |
-        parse_comment |
-        parse_size |
-        parse_time_limit |
-        parse_black_move |
-        parse_black_time |
-        parse_black_name |
-        parse_black_rank |
-        parse_white_move |
-        parse_white_time |
-        parse_white_name |
-        parse_white_rank |
-        parse_komi |
-        parse_unknown ) >>
-    (token)
-));
-
-
-named!(parse_unknown(CompleteStr) -> SgfToken,
-do_parse!(
-    name: dbg!(recognize!(take_while!(tag_name_matcher))) >>
-    tag!("[") >>
-    value: dbg!(recognize!(take_while!(tag_value_matcher))) >>
-    tag!("]") >>
-    (SgfToken::Unknown(format!("{}[{}]", name.to_string(), value.to_string())))
-));
-
-fn tag_name_matcher(c: char) -> bool {
-    c.is_alphabetic()
-}
-
-fn tag_value_matcher(c: char) -> bool {
-    c != ']'
-}
-
-named!(parse_node(CompleteStr) -> SgfNode,
-do_parse!(
-    tag!(";") >>
-    tokens: many1!(parse_token) >>
-    (SgfNode {
-        tokens,
-        invalid: vec![],
-        children: vec![],
-    })
-));
-
-named!(parse_game_tree(CompleteStr) -> SgfGameTree,
-do_parse!(
-    root: delimited!(tag!("("), call!(parse_sgf_nodes), tag!(")")) >>
-    (SgfGameTree {
-        root
-    })
-));
-
-named!(parse_game_trees(CompleteStr) -> Vec<SgfGameTree>,
-    many1!(parse_game_tree)
-);
-
-fn parse_sgf_nodes(input: CompleteStr) -> Result<(CompleteStr, SgfNode), nom::Err<CompleteStr>> {
-    let (output, mut node) = parse_node(input)?;
-    let invalid = node.tokens.drain_filter(|t| {
-        match t {
-            SgfToken::Unknown(_) => true,
-            _ => false
-        }
-    }).collect::<Vec<_>>();
-    node.invalid = invalid;
-    let remainder = match parse_sgf_nodes(output) {
-        Ok((rem, child)) => {
-            node.children.push(child);
-            rem
-        }
-        _ => output,
-    };
-    let remainder = match parse_game_trees(remainder) {
-        Ok((rem, mut trees)) => {
-            trees.drain(0..).for_each(|tree| { 
-                node.children.push(tree.root);
-            });
-            rem
-        }
-        _ => remainder
-    };
-
-    Ok((remainder, node))
-}
 
 ///
 /// Parse input and return a `SgfGameTree`
 ///
-pub fn parse(input: &str) -> Result<SgfGameTree, ()> {
-    match parse_game_tree(CompleteStr(input)) {
-        Ok((_, tree)) => Ok(tree),
-        _ => Err(())
+pub fn parse(input: &str) -> Result<GameTree, ()> {
+
+    println!("input: {:?}", input);
+    let tmp = SGFParser::parse(Rule::game_tree, input);
+    println!("result: {:?}", tmp);
+    let game_tree = tmp.unwrap().next().unwrap();
+    println!("AST: {:?}", game_tree);
+
+    let tree = parse_pair(game_tree);
+    println!("Parse AST: {:?}", tree);
+
+    let game = create_game_nodes(tree);
+    println!("Game tree: {:?}", game);
+    Ok(game)
+}
+
+fn create_game_nodes(parser_node: ParserNode) -> GameTree {
+    println!("parsing node: {:?}", parser_node);
+    match parser_node {
+        ParserNode::GameTree(tree_nodes) => {
+            let mut nodes: Vec<GameNode> = vec![];
+            let mut variations: Vec<GameTree> = vec![];
+            tree_nodes.into_iter().for_each(|node| {
+                match node {
+                    ParserNode::Sequence(sequence_nodes) => {
+                        for i in 0..sequence_nodes.len() {
+                            match &sequence_nodes[i] {
+                                ParserNode::Node(node_tokens) => {
+                                    let mut tokens: Vec<SgfToken> = vec![];
+                                    node_tokens.into_iter().for_each(|t| {
+                                        match t {
+                                            ParserNode::Token(token) => {
+                                                tokens.push(token.clone());
+                                            },
+                                            _ => {
+                                                unreachable!("node parsing");
+                                            }
+                                        }
+                                    });
+                                    nodes.push(GameNode {
+                                        tokens
+                                    });
+                                }
+                                _ => {
+                                    unreachable!("Invalid sequence element");
+                                }
+                            }
+                        }
+                    },
+                    ParserNode::GameTree(_) => {
+                        variations.push(create_game_nodes(node.clone()));
+                    },
+                    _ => {
+                        unreachable!("parsing game tree children");
+                    }
+                }
+            });
+            GameTree {
+                nodes,
+                variations,
+            }
+        },
+        ParserNode::Sequence(sequence_nodes) => {
+            unreachable!("seuqnce");
+        },
+        ParserNode::Node(_) => {
+            unreachable!("node");
+        },
+        ParserNode::Text(_) => {
+            unreachable!("text");
+        },
+        ParserNode::Token(_) => {
+            unreachable!("token");
+        },
     }
 }
+
+#[derive(Debug, PartialEq, Clone)]
+enum ParserNode<'a> {
+    Token(SgfToken),
+    Text(&'a str),
+    Node(Vec<ParserNode<'a>>),
+    Sequence(Vec<ParserNode<'a>>),
+    GameTree(Vec<ParserNode<'a>>),
+}
+
+fn parse_pair<'a>(pair: Pair<'a, Rule>) -> ParserNode<'a> {
+    match pair.as_rule() {
+        Rule::game_tree => {
+            println!("game tree!");
+            ParserNode::GameTree(pair.into_inner().map(|pair| {
+                parse_pair(pair)
+            }).collect())
+        },
+        Rule::sequence => {
+            println!("sequence");
+            ParserNode::Sequence(pair.into_inner().map(|pair| {
+                parse_pair(pair)
+            }).collect())
+        },
+        Rule::node => {
+            println!("node, {:?}", pair);
+            // let token = parse_pair(pair.into_inner().next().unwrap());
+            // println!("node end");
+            ParserNode::Node(pair.into_inner().map(|pair| {
+                parse_pair(pair)
+            }).collect())
+            // ParserNode::Node(token.into())
+        },
+        Rule::property => {
+            println!("property");
+            let mut pairs = pair.into_inner();
+            let ident = match parse_pair(pairs.next().unwrap()) {
+                ParserNode::Text(text) => text,
+                _ => {
+                    unreachable!("Property identifier should be a text string");
+                }
+            };
+            println!("got ident");
+            let value = match parse_pair(pairs.next().unwrap()) {
+                ParserNode::Text(text) => text,
+                _ => {
+                    unreachable!("Property value should be a text string");
+                }
+            };
+            println!("got value");
+            println!("property end");
+            ParserNode::Token(SgfToken::from_pair(ident, value))
+        },
+        Rule::property_identifier => {
+            println!("property_identifier: {}", pair.as_str());
+            ParserNode::Text(pair.as_str())
+        },
+        Rule::property_value => {
+            println!("property_value: {}", pair.as_str());
+            let value = pair.as_str();
+            let end = value.len() - 1;
+            ParserNode::Text(&value[1..end])
+        }
+    }
+}
+
+/*
+Collection = GameTree { GameTree }
+GameTree   = "(" Sequence { GameTree } ")"
+Sequence   = Node { Node }
+Node       = ";" { Property }
+Property   = PropIdent PropValue { PropValue }
+PropIdent  = UcLetter { UcLetter }
+PropValue  = "[" CValueType "]"
+CValueType = (ValueType | Compose)
+ValueType  = (None | Number | Real | Double | Color | SimpleText |
+    Text | Point  | Move | Stone)
+*/
