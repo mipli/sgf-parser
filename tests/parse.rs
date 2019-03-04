@@ -43,11 +43,11 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![
                             SgfToken::Move(Move {
-                                stone: Stone::Black,
+                                color: Color::Black,
                                 coordinate: (4, 3)
                             }),
                             SgfToken::Time(Time {
-                                stone: Stone::Black,
+                                color: Color::Black,
                                 time: 3498
                             })
                         ],
@@ -67,7 +67,7 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![
                             SgfToken::Move(Move {
-                                stone: Stone::Black,
+                                color: Color::Black,
                                 coordinate: (4, 3)
                             }),
                         ],
@@ -75,7 +75,7 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![
                             SgfToken::Move(Move {
-                                stone: Stone::White,
+                                color: Color::White,
                                 coordinate: (5, 6)
                             }),
                         ],
@@ -95,7 +95,7 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![
                             SgfToken::Move(Move {
-                                stone: Stone::Black,
+                                color: Color::Black,
                                 coordinate: (1, 1)
                             }),
                         ],
@@ -107,7 +107,7 @@ mod parser_tests {
                             GameNode {
                                 tokens: vec![
                                     SgfToken::Move(Move {
-                                        stone: Stone::White,
+                                        color: Color::White,
                                         coordinate: (2, 2)
                                     }),
                                 ],
@@ -120,7 +120,7 @@ mod parser_tests {
                             GameNode {
                                 tokens: vec![
                                     SgfToken::Move(Move {
-                                        stone: Stone::White,
+                                        color: Color::White,
                                         coordinate: (3, 3)
                                     }),
                                 ],
@@ -143,11 +143,11 @@ mod parser_tests {
                         tokens: vec![
                             SgfToken::Event("event".to_string()),
                             SgfToken::PlayerName(Player {
-                                stone: Stone::Black,
+                                color: Color::Black,
                                 name: "black".to_string()
                             }),
                             SgfToken::PlayerName(Player {
-                                stone: Stone::White,
+                                color: Color::White,
                                 name: "white".to_string()
                             }),
                             SgfToken::Comment("comment".to_string()),
@@ -156,7 +156,7 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![
                             SgfToken::Move(Move {
-                                stone: Stone::Black,
+                                color: Color::Black,
                                 coordinate: (1, 1)
                             }),
                         ],
@@ -166,34 +166,37 @@ mod parser_tests {
             })
         );
     }
-    /*
 
     #[test]
     fn can_parse_unkown_tags() {
         assert_eq!(
             parse("(;B[dc];FO[asdf];W[ef])"),
-            Ok(SgfGameTree {
-                root: SgfNode {
-                    tokens: vec![SgfToken::Move(Move {
-                        stone: Stone::Black,
-                        coordinate: (4, 3)
-                    })],
-                    invalid: vec![],
-                    children: vec![SgfNode {
-                        tokens: vec![],
-                        invalid: vec![SgfToken::Unknown("FO[asdf]".to_string())],
-                        children: vec![SgfNode {
-                            tokens: vec![SgfToken::Move(Move {
-                                stone: Stone::White,
+            Ok(GameTree {
+                nodes: vec![
+                    GameNode {
+                        tokens: vec![
+                            SgfToken::Move(Move {
+                                color: Color::Black,
+                                coordinate: (4, 3)
+                            }),
+                        ],
+                    },
+                    GameNode {
+                        tokens: vec![
+                            SgfToken::Unknown(("FO".to_string(), "asdf".to_string())),
+                        ],
+                    },
+                    GameNode {
+                        tokens: vec![
+                            SgfToken::Move(Move {
+                                color: Color::White,
                                 coordinate: (5, 6)
-                            })],
-                            invalid: vec![],
-                            children: vec![]
-                        }]
-                    }]
-                }
+                            }),
+                        ],
+                    }
+                ],
+                variations: vec![]
             })
         );
     }
-    */
 }

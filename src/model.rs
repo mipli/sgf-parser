@@ -1,30 +1,30 @@
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub enum Stone {
+pub enum Color {
     Black,
     White,
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Move {
-    pub stone: Stone,
+    pub color: Color,
     pub coordinate: (u8, u8),
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Time {
-    pub stone: Stone,
+    pub color: Color,
     pub time: u32,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Player {
-    pub stone: Stone,
+    pub color: Color,
     pub name: String,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Rank {
-    pub stone: Stone,
+    pub color: Color,
     pub rank: String,
 }
 
@@ -48,54 +48,54 @@ pub enum SgfToken {
 }
 
 impl SgfToken {
-    pub fn from_pair(ident: &str, value: &str) -> SgfToken {
-        let ident = ident.chars().filter(|c| c.is_uppercase()).collect::<String>();
+    pub fn from_pair(base_ident: &str, value: &str) -> SgfToken {
+        let ident = base_ident.chars().filter(|c| c.is_uppercase()).collect::<String>();
         match ident.as_ref() {
             "B" => {
                 SgfToken::Move(Move {
-                    stone: Stone::Black,
+                    color: Color::Black,
                     coordinate: str_to_coordinates(value).unwrap()
                 })
             },
             "BL" => {
                 SgfToken::Time(Time {
-                    stone: Stone::Black,
+                    color: Color::Black,
                     time: value.parse().unwrap()
                 })
             },
             "PB" => {
                 SgfToken::PlayerName(Player {
-                    stone: Stone::Black,
+                    color: Color::Black,
                     name: value.to_string()
                 })
             },
             "BR" => {
                 SgfToken::PlayerRank(Rank {
-                    stone: Stone::Black,
+                    color: Color::Black,
                     rank: value.to_string()
                 })
             },
             "W" => {
                 SgfToken::Move(Move {
-                    stone: Stone::White,
+                    color: Color::White,
                     coordinate: str_to_coordinates(value).unwrap()
                 })
             },
             "WL" => {
                 SgfToken::Time(Time {
-                    stone: Stone::White,
+                    color: Color::White,
                     time: value.parse().unwrap()
                 })
             },
             "PW" => {
                 SgfToken::PlayerName(Player {
-                    stone: Stone::White,
+                    color: Color::White,
                     name: value.to_string()
                 })
             },
             "WR" => {
                 SgfToken::PlayerRank(Rank {
-                    stone: Stone::White,
+                    color: Color::White,
                     rank: value.to_string()
                 })
             },
@@ -127,7 +127,7 @@ impl SgfToken {
                 SgfToken::Place(value.to_string())
             },
             _ => {
-                SgfToken::Unknown((ident.to_string(), value.to_string()))
+                SgfToken::Unknown((base_ident.to_string(), value.to_string()))
             }
         }
     }
@@ -141,24 +141,19 @@ fn str_to_coordinates(input: &str) -> Result<(u8, u8), std::string::ParseError> 
         .to_lowercase()
         .as_bytes()
         .iter()
-        .map(convert_u8_to_coordinate)
+        .map(|&c| convert_u8_to_coordinate(c))
         .take(2)
         .collect::<Vec<_>>();
     Ok((coords[0], coords[1]))
 }
 
-fn convert_u8_to_coordinate(c: &u8) -> u8 {
+fn convert_u8_to_coordinate(c: u8) -> u8 {
     let n = c - 96;
     if n >= 9 {
         n - 1
     } else {
         n
     }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct SgfCollection {
-    pub trees: Vec<GameTree>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -170,55 +165,4 @@ pub struct GameNode {
 pub struct GameTree {
     pub nodes: Vec<GameNode>,
     pub variations: Vec<GameTree>,
-}
-
-/// A SGF Node, with information about the node and all possible children
-#[derive(Debug, PartialEq)]
-pub struct SgfNode {
-    pub tokens: Vec<SgfToken>,
-    pub invalid: Vec<SgfToken>,
-    pub children: Vec<SgfNode>,
-}
-
-/// Root game Tree
-#[derive(Debug, PartialEq)]
-pub struct SgfGameTree {
-    pub root: SgfNode,
-}
-
-type BranchId = usize;
-
-impl SgfGameTree {
-    pub fn iter(&self) -> SgfGameTreeIterator {
-        SgfGameTreeIterator {
-            current: &self.root,
-            next: Some(&self.root),
-            branch: 0
-        }
-    }
-}
-
-pub struct SgfGameTreeIterator<'a> {
-    current: &'a SgfNode,
-    next: Option<&'a SgfNode>,
-    branch: BranchId
-}
-
-impl<'a> Iterator for SgfGameTreeIterator<'a> {
-    type Item = (&'a Vec<SgfToken>, &'a Vec<SgfToken>);
-
-    fn next(&mut self) -> Option<(&'a Vec<SgfToken>, &'a Vec<SgfToken>)> {
-        match self.next {
-            None => None,
-            Some(next) => {
-                self.current = next;
-                self.next = if self.current.children.is_empty() {
-                    None
-                } else {
-                    Some(&self.current.children[self.branch])
-                };
-                Some((&self.current.tokens, &self.current.invalid))
-            }
-        }
-    }
 }

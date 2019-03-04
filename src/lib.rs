@@ -1,5 +1,3 @@
-#![feature(drain_filter)]
-
 //! # SGF Parser for Rust
 //!
 //! A sgf parser for rust, using `nom`. 
@@ -22,9 +20,6 @@
 //!
 //! let tree: GameTree = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])").unwrap();
 //! ```
-
-#[macro_use]
-extern crate nom;
 
 mod model;
 mod parser;

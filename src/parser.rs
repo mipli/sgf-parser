@@ -24,69 +24,56 @@ pub fn parse(input: &str) -> Result<GameTree, ()> {
     let tree = parse_pair(game_tree);
     println!("Parse AST: {:?}", tree);
 
-    let game = create_game_nodes(tree);
+    let game = create_game_tree(tree);
     println!("Game tree: {:?}", game);
     Ok(game)
 }
 
-fn create_game_nodes(parser_node: ParserNode) -> GameTree {
-    println!("parsing node: {:?}", parser_node);
-    match parser_node {
-        ParserNode::GameTree(tree_nodes) => {
-            let mut nodes: Vec<GameNode> = vec![];
-            let mut variations: Vec<GameTree> = vec![];
-            tree_nodes.into_iter().for_each(|node| {
-                match node {
-                    ParserNode::Sequence(sequence_nodes) => {
-                        for i in 0..sequence_nodes.len() {
-                            match &sequence_nodes[i] {
-                                ParserNode::Node(node_tokens) => {
-                                    let mut tokens: Vec<SgfToken> = vec![];
-                                    node_tokens.into_iter().for_each(|t| {
-                                        match t {
-                                            ParserNode::Token(token) => {
-                                                tokens.push(token.clone());
-                                            },
-                                            _ => {
-                                                unreachable!("node parsing");
-                                            }
-                                        }
-                                    });
-                                    nodes.push(GameNode {
-                                        tokens
-                                    });
-                                }
-                                _ => {
-                                    unreachable!("Invalid sequence element");
-                                }
-                            }
-                        }
-                    },
-                    ParserNode::GameTree(_) => {
-                        variations.push(create_game_nodes(node.clone()));
-                    },
-                    _ => {
-                        unreachable!("parsing game tree children");
-                    }
+fn parse_sequence(sequence_nodes: Vec<ParserNode>) -> Vec<GameNode> {
+    let mut nodes = vec![];
+    for sequence_node in &sequence_nodes {
+        if let ParserNode::Node(node_tokens) = sequence_node {
+            let mut tokens: Vec<SgfToken> = vec![];
+            node_tokens.iter().for_each(|t| {
+                if let ParserNode::Token(token) = t {
+                    tokens.push(token.clone());
+                } else {
+                    unreachable!("node parsing");
                 }
             });
-            GameTree {
-                nodes,
-                variations,
+            nodes.push(GameNode {
+                tokens
+            });
+        } else {
+            unreachable!("Invalid sequence element");
+        }
+    }
+    nodes
+}
+
+fn create_game_tree(parser_node: ParserNode) -> GameTree {
+    if let ParserNode::GameTree(tree_nodes) = parser_node {
+        let mut nodes: Vec<GameNode> = vec![];
+        let mut variations: Vec<GameTree> = vec![];
+        tree_nodes.into_iter().for_each(|node| {
+            match node {
+                ParserNode::Sequence(sequence_nodes) => {
+                    nodes.extend(parse_sequence(sequence_nodes));
+                },
+                ParserNode::GameTree(_) => {
+                    variations.push(create_game_tree(node.clone()));
+                },
+                _ => {
+                    unreachable!("invalid game tree child");
+                }
             }
-        },
-        ParserNode::Sequence(sequence_nodes) => {
-            unreachable!("seuqnce");
-        },
-        ParserNode::Node(_) => {
-            unreachable!("node");
-        },
-        ParserNode::Text(_) => {
-            unreachable!("text");
-        },
-        ParserNode::Token(_) => {
-            unreachable!("token");
-        },
+        });
+        GameTree {
+            nodes,
+            variations,
+        }
+    } else {
+        unreachable!("invalid parser node");
     }
 }
 
@@ -99,71 +86,44 @@ enum ParserNode<'a> {
     GameTree(Vec<ParserNode<'a>>),
 }
 
-fn parse_pair<'a>(pair: Pair<'a, Rule>) -> ParserNode<'a> {
+fn parse_pair(pair: Pair<Rule>) -> ParserNode {
     match pair.as_rule() {
         Rule::game_tree => {
-            println!("game tree!");
             ParserNode::GameTree(pair.into_inner().map(|pair| {
                 parse_pair(pair)
             }).collect())
         },
         Rule::sequence => {
-            println!("sequence");
             ParserNode::Sequence(pair.into_inner().map(|pair| {
                 parse_pair(pair)
             }).collect())
         },
         Rule::node => {
-            println!("node, {:?}", pair);
-            // let token = parse_pair(pair.into_inner().next().unwrap());
-            // println!("node end");
             ParserNode::Node(pair.into_inner().map(|pair| {
                 parse_pair(pair)
             }).collect())
-            // ParserNode::Node(token.into())
         },
         Rule::property => {
-            println!("property");
             let mut pairs = pair.into_inner();
-            let ident = match parse_pair(pairs.next().unwrap()) {
-                ParserNode::Text(text) => text,
-                _ => {
-                    unreachable!("Property identifier should be a text string");
-                }
+            let ident = if let ParserNode::Text(text) = parse_pair(pairs.next().unwrap()) {
+                text
+            } else {
+                unreachable!("Property identifier should be a text string");
             };
-            println!("got ident");
-            let value = match parse_pair(pairs.next().unwrap()) {
-                ParserNode::Text(text) => text,
-                _ => {
-                    unreachable!("Property value should be a text string");
-                }
+            let value = if let ParserNode::Text(text) = parse_pair(pairs.next().unwrap()) {
+                text
+            } else {
+                unreachable!("Property identifier should be a text string");
             };
-            println!("got value");
-            println!("property end");
             ParserNode::Token(SgfToken::from_pair(ident, value))
         },
         Rule::property_identifier => {
-            println!("property_identifier: {}", pair.as_str());
             ParserNode::Text(pair.as_str())
         },
         Rule::property_value => {
-            println!("property_value: {}", pair.as_str());
             let value = pair.as_str();
             let end = value.len() - 1;
             ParserNode::Text(&value[1..end])
         }
     }
 }
-
-/*
-Collection = GameTree { GameTree }
-GameTree   = "(" Sequence { GameTree } ")"
-Sequence   = Node { Node }
-Node       = ";" { Property }
-Property   = PropIdent PropValue { PropValue }
-PropIdent  = UcLetter { UcLetter }
-PropValue  = "[" CValueType "]"
-CValueType = (ValueType | Compose)
-ValueType  = (None | Number | Real | Double | Color | SimpleText |
-    Text | Point  | Move | Stone)
-*/
