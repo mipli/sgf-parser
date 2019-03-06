@@ -44,7 +44,8 @@ pub enum SgfToken {
     Size(u32),
     TimeLimit(u32),
     Comment(String),
-    Unknown((String, String))
+    Unknown((String, String)),
+    Invalid((String, String)),
 }
 
 impl SgfToken {
@@ -52,16 +53,24 @@ impl SgfToken {
         let ident = base_ident.chars().filter(|c| c.is_uppercase()).collect::<String>();
         match ident.as_ref() {
             "B" => {
-                SgfToken::Move(Move {
-                    color: Color::Black,
-                    coordinate: str_to_coordinates(value).unwrap()
-                })
+                if let Ok(coordinate) = str_to_coordinates(value) {
+                    SgfToken::Move(Move {
+                        color: Color::Black,
+                        coordinate,
+                    })
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
             },
             "BL" => {
-                SgfToken::Time(Time {
-                    color: Color::Black,
-                    time: value.parse().unwrap()
-                })
+                if let Ok(time) = value.parse() {
+                    SgfToken::Time(Time {
+                        color: Color::Black,
+                        time,
+                    })
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
             },
             "PB" => {
                 SgfToken::PlayerName(Player {
@@ -76,16 +85,24 @@ impl SgfToken {
                 })
             },
             "W" => {
-                SgfToken::Move(Move {
-                    color: Color::White,
-                    coordinate: str_to_coordinates(value).unwrap()
-                })
+                if let Ok(coordinate) = str_to_coordinates(value) {
+                    SgfToken::Move(Move {
+                        color: Color::White,
+                        coordinate,
+                    })
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
             },
             "WL" => {
-                SgfToken::Time(Time {
-                    color: Color::White,
-                    time: value.parse().unwrap()
-                })
+                if let Ok(time) = value.parse() {
+                    SgfToken::Time(Time {
+                        color: Color::White,
+                        time,
+                    })
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
             },
             "PW" => {
                 SgfToken::PlayerName(Player {
@@ -100,13 +117,25 @@ impl SgfToken {
                 })
             },
             "KM" => {
-                SgfToken::Komi(value.parse().expect("trying to unwrap komi value"))
+                if let Ok(komi) = value.parse() {
+                    SgfToken::Komi(komi)
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
             },
             "SZ" => {
-                SgfToken::Size(value.parse().expect("trying to unwrap size value"))
+                if let Ok(size) = value.parse() {
+                    SgfToken::Size(size)
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
             },
             "TM" => {
-                SgfToken::TimeLimit(value.parse().expect("trying to unwrap time limit value"))
+                if let Ok(time) = value.parse() {
+                    SgfToken::TimeLimit(time)
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
             },
             "EV" => {
                 SgfToken::Event(value.to_string())
@@ -170,4 +199,13 @@ pub struct GameNode {
 pub struct GameTree {
     pub nodes: Vec<GameNode>,
     pub variations: Vec<GameTree>,
+}
+
+impl Default for GameTree {
+    fn default() -> Self {
+        GameTree {
+            nodes: vec![],
+            variations: vec![]
+        }
+    }
 }

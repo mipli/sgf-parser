@@ -21,6 +21,8 @@
 //! let tree: GameTree = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])").unwrap();
 //! ```
 
+#![feature(slice_patterns)]
+
 mod model;
 mod parser;
 mod error;

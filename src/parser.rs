@@ -14,10 +14,13 @@ struct SGFParser;
 ///
 pub fn parse(input: &str) -> Result<GameTree, SgfError> {
     let mut parse_roots = SGFParser::parse(Rule::game_tree, input).map_err(SgfError::parse_error)?;
-    let game_tree = parse_roots.next().unwrap();
-    let tree = parse_pair(game_tree);
-    let game = create_game_tree(tree);
-    Ok(game)
+    if let Some(game_tree) = parse_roots.next() {
+        let tree = parse_pair(game_tree);
+        let game = create_game_tree(tree);
+        Ok(game)
+    } else {
+        Ok(GameTree::default())
+    }
 }
 
 fn parse_sequence(sequence_nodes: Vec<ParserNode>) -> Vec<GameNode> {
@@ -95,16 +98,20 @@ fn parse_pair(pair: Pair<Rule>) -> ParserNode {
             }).collect())
         },
         Rule::property => {
-            let mut pairs = pair.into_inner();
-            let ident = if let ParserNode::Text(text) = parse_pair(pairs.next().unwrap()) {
-                text
-            } else {
-                unreachable!("Property identifier should be a text string");
-            };
-            let value = if let ParserNode::Text(text) = parse_pair(pairs.next().unwrap()) {
-                text
-            } else {
-                unreachable!("Property identifier should be a text string");
+            let text_nodes = pair.into_inner().map(|pair| {
+                if let ParserNode::Text(text) = parse_pair(pair) {
+                    text
+                } else {
+                    unreachable!("Expected text node");
+                }
+            }).collect::<Vec<&str>>();
+            let (ident, value) = match &text_nodes[..] {
+                [i, v] => {
+                    (i, v)
+                }
+                _ => {
+                    unreachable!("Property node should only contain two text nodes");
+                }
             };
             ParserNode::Token(SgfToken::from_pair(ident, value))
         },
