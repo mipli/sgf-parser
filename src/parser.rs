@@ -9,23 +9,14 @@ use crate::*;
 #[grammar = "/home/michael/code/rust/sgf-parser/parser.pest"]
 struct SGFParser;
 
-
 ///
 /// Parse input and return a `SgfGameTree`
 ///
-pub fn parse(input: &str) -> Result<GameTree, ()> {
-
-    println!("input: {:?}", input);
-    let tmp = SGFParser::parse(Rule::game_tree, input);
-    println!("result: {:?}", tmp);
-    let game_tree = tmp.unwrap().next().unwrap();
-    println!("AST: {:?}", game_tree);
-
+pub fn parse(input: &str) -> Result<GameTree, SgfError> {
+    let mut parse_roots = SGFParser::parse(Rule::game_tree, input).map_err(SgfError::parse_error)?;
+    let game_tree = parse_roots.next().unwrap();
     let tree = parse_pair(game_tree);
-    println!("Parse AST: {:?}", tree);
-
     let game = create_game_tree(tree);
-    println!("Game tree: {:?}", game);
     Ok(game)
 }
 

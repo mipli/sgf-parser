@@ -4,24 +4,28 @@ mod parser_tests {
 
     #[test]
     fn can_parse_komi() {
-        assert_eq!(
-            parse("(;KM[6.5])"),
-            Ok(GameTree {
+        let sgf = parse("(;KM[6.5])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(sgf,
+            GameTree {
                 nodes: vec![
                         GameNode {
                             tokens: vec![SgfToken::Komi(6.5f32)]
                         }
                     ],
                 variations: vec![]
-            })
+            }
         );
     }
 
     #[test]
     fn can_ignore_lowercase_characters() {
-        assert_eq!(
-            parse("(;CopyRight[2017])"),
-            Ok(GameTree {
+        let sgf = parse("(;CopyRight[2017])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(sgf,
+            GameTree {
                 nodes: vec![
                     GameNode {
                         tokens: vec![
@@ -30,15 +34,17 @@ mod parser_tests {
                     }
                 ],
                 variations: vec![]
-            })
+            }
         );
     }
 
     #[test]
     fn can_parse_game_tree_single_node() {
-        assert_eq!(
-            parse("(;B[dc]BL[3498])"),
-            Ok(GameTree {
+        let sgf = parse("(;B[dc]BL[3498])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(sgf,
+            GameTree {
                 nodes: vec![
                     GameNode {
                         tokens: vec![
@@ -54,15 +60,17 @@ mod parser_tests {
                     }
                 ],
                 variations: vec![]
-            })
+            }
         );
     }
 
     #[test]
     fn can_parse_game_tree_two_nodes() {
-        assert_eq!(
-            parse("(;B[dc];W[ef])"),
-            Ok(GameTree {
+        let sgf = parse("(;B[dc];W[ef])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(sgf,
+            GameTree {
                 nodes: vec![
                     GameNode {
                         tokens: vec![
@@ -82,15 +90,17 @@ mod parser_tests {
                     }
                 ],
                 variations: vec![]
-            })
+            }
         );
     }
 
     #[test]
     fn can_parse_game_tree_simple_branch() {
-        assert_eq!(
-            parse("(;B[aa](;W[bb])(;W[cc]))"),
-            Ok(GameTree {
+        let sgf = parse("(;B[aa](;W[bb])(;W[cc]))");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(sgf,
+            GameTree {
                 nodes: vec![
                     GameNode {
                         tokens: vec![
@@ -129,15 +139,17 @@ mod parser_tests {
                         variations: vec![]
                     }
                 ]
-            })
+            }
         );
     }
 
     #[test]
     fn can_parse_game_information() {
-        assert_eq!(
-            parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])"),
-            Ok(GameTree {
+        let sgf = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(sgf,
+            GameTree {
                 nodes: vec![
                     GameNode {
                         tokens: vec![
@@ -163,15 +175,17 @@ mod parser_tests {
                     }
                 ],
                 variations: vec![]
-            })
+            }
         );
     }
 
     #[test]
     fn can_parse_unkown_tags() {
-        assert_eq!(
-            parse("(;B[dc];FO[asdf];W[ef])"),
-            Ok(GameTree {
+        let sgf = parse("(;B[dc];FO[asdf];W[ef])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(sgf,
+            GameTree {
                 nodes: vec![
                     GameNode {
                         tokens: vec![
@@ -196,7 +210,7 @@ mod parser_tests {
                     }
                 ],
                 variations: vec![]
-            })
+            }
         );
     }
 }

@@ -13,3 +13,4 @@ keywords = ["parser", "sgf", "go", "baduk", "weiqi"]
 nom = "4.1.1"
 pest = "*"
 pest_derive = "*"
+derive_more = "*"

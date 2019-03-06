@@ -157,6 +157,11 @@ fn convert_u8_to_coordinate(c: u8) -> u8 {
 }
 
 #[derive(Debug, PartialEq)]
+pub struct Collection {
+    pub trees: Vec<GameTree>,
+}
+
+#[derive(Debug, PartialEq)]
 pub struct GameNode {
     pub tokens: Vec<SgfToken>,
 }

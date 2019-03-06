@@ -23,6 +23,8 @@
 
 mod model;
 mod parser;
+mod error;
 
 pub use crate::model::*;
+pub use crate::error::{SgfError, SgfErrorKind};
 pub use crate::parser::parse;
