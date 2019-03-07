@@ -23,7 +23,7 @@ pub fn parse(input: &str) -> Result<GameTree, SgfError> {
     }
 }
 
-fn parse_sequence(sequence_nodes: Vec<ParserNode>) -> Result<Vec<GameNode>, SgfError> {
+fn parse_sequence(sequence_nodes: Vec<ParserNode<'_>>) -> Result<Vec<GameNode>, SgfError> {
     let mut nodes = vec![];
     for sequence_node in &sequence_nodes {
         if let ParserNode::Node(node_tokens) = sequence_node {
@@ -45,7 +45,7 @@ fn parse_sequence(sequence_nodes: Vec<ParserNode>) -> Result<Vec<GameNode>, SgfE
     Ok(nodes)
 }
 
-fn create_game_tree(parser_node: ParserNode) -> Result<GameTree, SgfError> {
+fn create_game_tree(parser_node: ParserNode<'_>) -> Result<GameTree, SgfError> {
     if let ParserNode::GameTree(tree_nodes) = parser_node {
         let mut nodes: Vec<GameNode> = vec![];
         let mut variations: Vec<GameTree> = vec![];
@@ -80,7 +80,7 @@ enum ParserNode<'a> {
     GameTree(Vec<ParserNode<'a>>),
 }
 
-fn parse_pair(pair: Pair<Rule>) -> ParserNode {
+fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
     match pair.as_rule() {
         Rule::game_tree => {
             ParserNode::GameTree(pair.into_inner().map(|pair| {

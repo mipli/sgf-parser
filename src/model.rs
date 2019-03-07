@@ -1,3 +1,5 @@
+use crate::{SgfError, SgfErrorKind};
+
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Color {
     Black,
@@ -162,9 +164,9 @@ impl SgfToken {
     }
 }
 
-fn str_to_coordinates(input: &str) -> Result<(u8, u8), std::string::ParseError> {
+fn str_to_coordinates(input: &str) -> Result<(u8, u8), SgfError> {
     if input.len() != 2 {
-        return Ok((5, 5));
+        return Err(SgfErrorKind::ParseError.into());
     }
     let coords = input
         .to_lowercase()
@@ -190,7 +192,7 @@ pub struct Collection {
     pub trees: Vec<GameTree>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct GameNode {
     pub tokens: Vec<SgfToken>,
 }
@@ -207,5 +209,39 @@ impl Default for GameTree {
             nodes: vec![],
             variations: vec![]
         }
+    }
+}
+
+impl GameTree {
+    pub fn get_unknown_nodes(&self) -> Vec<&GameNode> {
+        let mut unknowns = self.nodes.iter().filter(|node| {
+            node.tokens.iter().any(|t| {
+                match t {
+                    SgfToken::Unknown(_) => true,
+                    _ => false
+                }
+            })
+        }).collect::<Vec<_>>();
+        self.variations.iter().for_each(|variation| {
+            let tmp = variation.get_unknown_nodes();
+            unknowns.extend(tmp);
+        });
+        unknowns
+    }
+
+    pub fn get_invalid_nodes(&self) -> Vec<&GameNode> {
+        let mut invalids = self.nodes.iter().filter(|node| {
+            node.tokens.iter().any(|t| {
+                match t {
+                    SgfToken::Invalid(_) => true,
+                    _ => false
+                }
+            })
+        }).collect::<Vec<_>>();
+        self.variations.iter().for_each(|variation| {
+            let tmp = variation.get_invalid_nodes();
+            invalids.extend(tmp);
+        });
+        invalids
     }
 }

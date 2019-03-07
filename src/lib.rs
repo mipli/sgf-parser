@@ -22,6 +22,7 @@
 //! ```
 
 #![feature(slice_patterns)]
+#![deny(rust_2018_idioms)]
 
 mod model;
 mod parser;
