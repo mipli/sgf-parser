@@ -1,11 +1,11 @@
 //! # SGF Parser for Rust
 //!
-//! A sgf parser for rust, using `nom`. 
+//! A sgf parser for rust, using `nom`.
 //!
 //! Supports most basic SGF properties, and tree branching.
 //!
 //! ## Output
-//! 
+//!
 //! Output is a `SgfGameTree`, containing a single root `SgfNode`.
 //!
 //! ## Coming features
@@ -24,10 +24,10 @@
 #![feature(slice_patterns)]
 #![deny(rust_2018_idioms)]
 
+mod error;
 mod model;
 mod parser;
-mod error;
 
-pub use crate::model::*;
 pub use crate::error::{SgfError, SgfErrorKind};
+pub use crate::model::*;
 pub use crate::parser::parse;

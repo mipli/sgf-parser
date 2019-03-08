@@ -7,13 +7,12 @@ mod parser_tests {
         let sgf = parse("(;KM[6.5])");
         assert!(sgf.is_ok());
         let sgf = sgf.unwrap();
-        assert_eq!(sgf,
+        assert_eq!(
+            sgf,
             GameTree {
-                nodes: vec![
-                        GameNode {
-                            tokens: vec![SgfToken::Komi(6.5f32)]
-                        }
-                    ],
+                nodes: vec![GameNode {
+                    tokens: vec![SgfToken::Komi(6.5f32)]
+                }],
                 variations: vec![]
             }
         );
@@ -24,15 +23,12 @@ mod parser_tests {
         let sgf = parse("(;CopyRight[2017])");
         assert!(sgf.is_ok());
         let sgf = sgf.unwrap();
-        assert_eq!(sgf,
+        assert_eq!(
+            sgf,
             GameTree {
-                nodes: vec![
-                    GameNode {
-                        tokens: vec![
-                            SgfToken::Copyright("2017".to_string())
-                        ],
-                    }
-                ],
+                nodes: vec![GameNode {
+                    tokens: vec![SgfToken::Copyright("2017".to_string())],
+                }],
                 variations: vec![]
             }
         );
@@ -43,22 +39,21 @@ mod parser_tests {
         let sgf = parse("(;B[dc]BL[3498])");
         assert!(sgf.is_ok());
         let sgf = sgf.unwrap();
-        assert_eq!(sgf,
+        assert_eq!(
+            sgf,
             GameTree {
-                nodes: vec![
-                    GameNode {
-                        tokens: vec![
-                            SgfToken::Move(Move {
-                                color: Color::Black,
-                                coordinate: (4, 3)
-                            }),
-                            SgfToken::Time(Time {
-                                color: Color::Black,
-                                time: 3498
-                            })
-                        ],
-                    }
-                ],
+                nodes: vec![GameNode {
+                    tokens: vec![
+                        SgfToken::Move(Move {
+                            color: Color::Black,
+                            coordinate: (4, 3)
+                        }),
+                        SgfToken::Time(Time {
+                            color: Color::Black,
+                            time: 3498
+                        })
+                    ],
+                }],
                 variations: vec![]
             }
         );
@@ -69,24 +64,21 @@ mod parser_tests {
         let sgf = parse("(;B[dc];W[ef])");
         assert!(sgf.is_ok());
         let sgf = sgf.unwrap();
-        assert_eq!(sgf,
+        assert_eq!(
+            sgf,
             GameTree {
                 nodes: vec![
                     GameNode {
-                        tokens: vec![
-                            SgfToken::Move(Move {
-                                color: Color::Black,
-                                coordinate: (4, 3)
-                            }),
-                        ],
+                        tokens: vec![SgfToken::Move(Move {
+                            color: Color::Black,
+                            coordinate: (4, 3)
+                        }),],
                     },
                     GameNode {
-                        tokens: vec![
-                            SgfToken::Move(Move {
-                                color: Color::White,
-                                coordinate: (5, 6)
-                            }),
-                        ],
+                        tokens: vec![SgfToken::Move(Move {
+                            color: Color::White,
+                            coordinate: (5, 6)
+                        }),],
                     }
                 ],
                 variations: vec![]
@@ -99,43 +91,32 @@ mod parser_tests {
         let sgf = parse("(;B[aa](;W[bb])(;W[cc]))");
         assert!(sgf.is_ok());
         let sgf = sgf.unwrap();
-        assert_eq!(sgf,
+        assert_eq!(
+            sgf,
             GameTree {
-                nodes: vec![
-                    GameNode {
-                        tokens: vec![
-                            SgfToken::Move(Move {
-                                color: Color::Black,
-                                coordinate: (1, 1)
-                            }),
-                        ],
-                    },
-                ],
+                nodes: vec![GameNode {
+                    tokens: vec![SgfToken::Move(Move {
+                        color: Color::Black,
+                        coordinate: (1, 1)
+                    }),],
+                },],
                 variations: vec![
                     GameTree {
-                        nodes: vec![
-                            GameNode {
-                                tokens: vec![
-                                    SgfToken::Move(Move {
-                                        color: Color::White,
-                                        coordinate: (2, 2)
-                                    }),
-                                ],
-                            },
-                        ],
+                        nodes: vec![GameNode {
+                            tokens: vec![SgfToken::Move(Move {
+                                color: Color::White,
+                                coordinate: (2, 2)
+                            }),],
+                        },],
                         variations: vec![]
                     },
                     GameTree {
-                        nodes: vec![
-                            GameNode {
-                                tokens: vec![
-                                    SgfToken::Move(Move {
-                                        color: Color::White,
-                                        coordinate: (3, 3)
-                                    }),
-                                ],
-                            },
-                        ],
+                        nodes: vec![GameNode {
+                            tokens: vec![SgfToken::Move(Move {
+                                color: Color::White,
+                                coordinate: (3, 3)
+                            }),],
+                        },],
                         variations: vec![]
                     }
                 ]
@@ -148,7 +129,8 @@ mod parser_tests {
         let sgf = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])");
         assert!(sgf.is_ok());
         let sgf = sgf.unwrap();
-        assert_eq!(sgf,
+        assert_eq!(
+            sgf,
             GameTree {
                 nodes: vec![
                     GameNode {
@@ -166,12 +148,10 @@ mod parser_tests {
                         ],
                     },
                     GameNode {
-                        tokens: vec![
-                            SgfToken::Move(Move {
-                                color: Color::Black,
-                                coordinate: (1, 1)
-                            }),
-                        ],
+                        tokens: vec![SgfToken::Move(Move {
+                            color: Color::Black,
+                            coordinate: (1, 1)
+                        }),],
                     }
                 ],
                 variations: vec![]
@@ -184,29 +164,24 @@ mod parser_tests {
         let sgf = parse("(;B[dc];FO[asdf];W[ef])");
         assert!(sgf.is_ok());
         let sgf = sgf.unwrap();
-        assert_eq!(sgf,
+        assert_eq!(
+            sgf,
             GameTree {
                 nodes: vec![
                     GameNode {
-                        tokens: vec![
-                            SgfToken::Move(Move {
-                                color: Color::Black,
-                                coordinate: (4, 3)
-                            }),
-                        ],
+                        tokens: vec![SgfToken::Move(Move {
+                            color: Color::Black,
+                            coordinate: (4, 3)
+                        }),],
                     },
                     GameNode {
-                        tokens: vec![
-                            SgfToken::Unknown(("FO".to_string(), "asdf".to_string())),
-                        ],
+                        tokens: vec![SgfToken::Unknown(("FO".to_string(), "asdf".to_string())),],
                     },
                     GameNode {
-                        tokens: vec![
-                            SgfToken::Move(Move {
-                                color: Color::White,
-                                coordinate: (5, 6)
-                            }),
-                        ],
+                        tokens: vec![SgfToken::Move(Move {
+                            color: Color::White,
+                            coordinate: (5, 6)
+                        }),],
                     }
                 ],
                 variations: vec![]

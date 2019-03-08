@@ -17,17 +17,15 @@ pub enum SgfErrorKind {
 
 impl Error for SgfError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.source.as_ref()
+        self.source
+            .as_ref()
             .map(|boxed| boxed.as_ref() as &(dyn Error + 'static))
     }
 }
 
 impl From<SgfErrorKind> for SgfError {
     fn from(kind: SgfErrorKind) -> SgfError {
-        SgfError {
-            kind,
-            source: None
-        }
+        SgfError { kind, source: None }
     }
 }
 

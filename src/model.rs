@@ -52,7 +52,10 @@ pub enum SgfToken {
 
 impl SgfToken {
     pub fn from_pair(base_ident: &str, value: &str) -> SgfToken {
-        let ident = base_ident.chars().filter(|c| c.is_uppercase()).collect::<String>();
+        let ident = base_ident
+            .chars()
+            .filter(|c| c.is_uppercase())
+            .collect::<String>();
         match ident.as_ref() {
             "B" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
@@ -63,7 +66,7 @@ impl SgfToken {
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            },
+            }
             "BL" => {
                 if let Ok(time) = value.parse() {
                     SgfToken::Time(Time {
@@ -73,19 +76,15 @@ impl SgfToken {
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            },
-            "PB" => {
-                SgfToken::PlayerName(Player {
-                    color: Color::Black,
-                    name: value.to_string()
-                })
-            },
-            "BR" => {
-                SgfToken::PlayerRank(Rank {
-                    color: Color::Black,
-                    rank: value.to_string()
-                })
-            },
+            }
+            "PB" => SgfToken::PlayerName(Player {
+                color: Color::Black,
+                name: value.to_string(),
+            }),
+            "BR" => SgfToken::PlayerRank(Rank {
+                color: Color::Black,
+                rank: value.to_string(),
+            }),
             "W" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
                     SgfToken::Move(Move {
@@ -95,7 +94,7 @@ impl SgfToken {
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            },
+            }
             "WL" => {
                 if let Ok(time) = value.parse() {
                     SgfToken::Time(Time {
@@ -105,61 +104,43 @@ impl SgfToken {
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            },
-            "PW" => {
-                SgfToken::PlayerName(Player {
-                    color: Color::White,
-                    name: value.to_string()
-                })
-            },
-            "WR" => {
-                SgfToken::PlayerRank(Rank {
-                    color: Color::White,
-                    rank: value.to_string()
-                })
-            },
+            }
+            "PW" => SgfToken::PlayerName(Player {
+                color: Color::White,
+                name: value.to_string(),
+            }),
+            "WR" => SgfToken::PlayerRank(Rank {
+                color: Color::White,
+                rank: value.to_string(),
+            }),
             "KM" => {
                 if let Ok(komi) = value.parse() {
                     SgfToken::Komi(komi)
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            },
+            }
             "SZ" => {
                 if let Ok(size) = value.parse() {
                     SgfToken::Size(size)
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            },
+            }
             "TM" => {
                 if let Ok(time) = value.parse() {
                     SgfToken::TimeLimit(time)
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            },
-            "EV" => {
-                SgfToken::Event(value.to_string())
-            },
-            "C" => {
-                SgfToken::Comment(value.to_string())
-            },
-            "GN" => {
-                SgfToken::GameName(value.to_string())
-            },
-            "CR" => {
-                SgfToken::Copyright(value.to_string())
-            },
-            "DT" => {
-                SgfToken::Date(value.to_string())
-            },
-            "PC" => {
-                SgfToken::Place(value.to_string())
-            },
-            _ => {
-                SgfToken::Unknown((base_ident.to_string(), value.to_string()))
             }
+            "EV" => SgfToken::Event(value.to_string()),
+            "C" => SgfToken::Comment(value.to_string()),
+            "GN" => SgfToken::GameName(value.to_string()),
+            "CR" => SgfToken::Copyright(value.to_string()),
+            "DT" => SgfToken::Date(value.to_string()),
+            "PC" => SgfToken::Place(value.to_string()),
+            _ => SgfToken::Unknown((base_ident.to_string(), value.to_string())),
         }
     }
 }
@@ -207,21 +188,23 @@ impl Default for GameTree {
     fn default() -> Self {
         GameTree {
             nodes: vec![],
-            variations: vec![]
+            variations: vec![],
         }
     }
 }
 
 impl GameTree {
     pub fn get_unknown_nodes(&self) -> Vec<&GameNode> {
-        let mut unknowns = self.nodes.iter().filter(|node| {
-            node.tokens.iter().any(|t| {
-                match t {
+        let mut unknowns = self
+            .nodes
+            .iter()
+            .filter(|node| {
+                node.tokens.iter().any(|t| match t {
                     SgfToken::Unknown(_) => true,
-                    _ => false
-                }
+                    _ => false,
+                })
             })
-        }).collect::<Vec<_>>();
+            .collect::<Vec<_>>();
         self.variations.iter().for_each(|variation| {
             let tmp = variation.get_unknown_nodes();
             unknowns.extend(tmp);
@@ -230,14 +213,16 @@ impl GameTree {
     }
 
     pub fn get_invalid_nodes(&self) -> Vec<&GameNode> {
-        let mut invalids = self.nodes.iter().filter(|node| {
-            node.tokens.iter().any(|t| {
-                match t {
+        let mut invalids = self
+            .nodes
+            .iter()
+            .filter(|node| {
+                node.tokens.iter().any(|t| match t {
                     SgfToken::Invalid(_) => true,
-                    _ => false
-                }
+                    _ => false,
+                })
             })
-        }).collect::<Vec<_>>();
+            .collect::<Vec<_>>();
         self.variations.iter().for_each(|variation| {
             let tmp = variation.get_invalid_nodes();
             invalids.extend(tmp);
@@ -246,7 +231,7 @@ impl GameTree {
     }
 
     pub fn iter(&self) -> GameTreeIterator<'_> {
-        GameTreeIterator::new(self) 
+        GameTreeIterator::new(self)
     }
 }
 
@@ -259,7 +244,7 @@ impl<'a> GameTreeIterator<'a> {
     fn new(game_tree: &'a GameTree) -> Self {
         GameTreeIterator {
             tree: game_tree,
-            index: 0
+            index: 0,
         }
     }
 }
