@@ -24,19 +24,13 @@ pub struct Player {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Rank {
-    pub color: Color,
-    pub rank: String,
-}
-
 /// Enum describing all possible SGF Properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
-    Move(Move),
-    Time(Time),
-    PlayerName(Player),
-    PlayerRank(Rank),
+    Move { color: Color, coordinate: (u8, u8) },
+    Time { color: Color, time: u32 },
+    PlayerName { color: Color, rank: String },
+    PlayerRank { color: Color, rank: String },
     Komi(f32),
     Event(String),
     Copyright(String),
@@ -81,10 +75,10 @@ impl SgfToken {
                 color: Color::Black,
                 name: value.to_string(),
             }),
-            "BR" => SgfToken::PlayerRank(Rank {
+            "BR" => SgfToken::PlayerRank {
                 color: Color::Black,
                 rank: value.to_string(),
-            }),
+            },
             "W" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
                     SgfToken::Move(Move {
@@ -109,10 +103,10 @@ impl SgfToken {
                 color: Color::White,
                 name: value.to_string(),
             }),
-            "WR" => SgfToken::PlayerRank(Rank {
+            "WR" => SgfToken::PlayerRank {
                 color: Color::White,
                 rank: value.to_string(),
-            }),
+            },
             "KM" => {
                 if let Ok(komi) = value.parse() {
                     SgfToken::Komi(komi)
@@ -194,6 +188,18 @@ impl Default for GameTree {
 }
 
 impl GameTree {
+    pub fn count_max_nodes(&self) -> usize {
+        let count = self.nodes.len();
+        let variation_count = self
+            .variations
+            .iter()
+            .map(|v| v.count_max_nodes())
+            .max()
+            .unwrap_or(0);
+
+        count + variation_count
+    }
+
     pub fn get_unknown_nodes(&self) -> Vec<&GameNode> {
         let mut unknowns = self
             .nodes
@@ -230,6 +236,14 @@ impl GameTree {
         invalids
     }
 
+    pub fn has_variations(&self) -> bool {
+        !self.variations.is_empty()
+    }
+
+    pub fn count_varations(&self) -> usize {
+        self.variations.len()
+    }
+
     pub fn iter(&self) -> GameTreeIterator<'_> {
         GameTreeIterator::new(self)
     }
@@ -238,6 +252,7 @@ impl GameTree {
 pub struct GameTreeIterator<'a> {
     tree: &'a GameTree,
     index: usize,
+    variation: usize,
 }
 
 impl<'a> GameTreeIterator<'a> {
@@ -245,6 +260,24 @@ impl<'a> GameTreeIterator<'a> {
         GameTreeIterator {
             tree: game_tree,
             index: 0,
+            variation: 0,
+        }
+    }
+
+    pub fn has_variations(&self) -> bool {
+        self.tree.has_variations()
+    }
+
+    pub fn count_varations(&self) -> usize {
+        self.tree.count_varations()
+    }
+
+    pub fn pick_variation(&mut self, variation: usize) -> Result<(), ()> {
+        if variation < self.tree.variations.len() {
+            self.variation = variation;
+            Ok(())
+        } else {
+            Err(())
         }
     }
 }
@@ -255,13 +288,14 @@ impl<'a> Iterator for GameTreeIterator<'a> {
     fn next(&mut self) -> Option<&'a GameNode> {
         match self.tree.nodes.get(self.index) {
             Some(node) => {
-                self.index = self.index + 1;
+                self.index += 1;
                 Some(&node)
             }
             None => {
                 if !self.tree.variations.is_empty() {
-                    self.tree = &self.tree.variations[0];
+                    self.tree = &self.tree.variations[self.variation];
                     self.index = 0;
+                    self.variation = 0;
                     self.next()
                 } else {
                     None

@@ -106,4 +106,50 @@ mod model_tests {
         );
         assert_eq!(iter.next(), None);
     }
+
+    #[test]
+    fn iterator_can_switch_branch() {
+        let tree: GameTree = parse("(;B[dc];W[ef](;B[aa])(;B[cc]))").unwrap();
+        let mut iter = tree.iter();
+
+        assert!(iter.has_variations());
+        assert_eq!(iter.count_varations(), 2);
+
+        assert!(iter.pick_variation(1).is_ok());
+
+        assert_eq!(
+            iter.next(),
+            Some(&GameNode {
+                tokens: vec![SgfToken::Move(Move {
+                    color: Color::Black,
+                    coordinate: (4, 3)
+                })]
+            })
+        );
+        assert_eq!(
+            iter.next(),
+            Some(&GameNode {
+                tokens: vec![SgfToken::Move(Move {
+                    color: Color::White,
+                    coordinate: (5, 6)
+                })]
+            })
+        );
+        assert_eq!(
+            iter.next(),
+            Some(&GameNode {
+                tokens: vec![SgfToken::Move(Move {
+                    color: Color::Black,
+                    coordinate: (3, 3)
+                })]
+            })
+        );
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn count_tree_length() {
+        let tree: GameTree = parse("(;B[dc];W[ef](;B[aa])(;B[cc];W[dd]))").unwrap();
+        assert_eq!(tree.count_max_nodes(), 4);
+    }
 }
