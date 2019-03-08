@@ -40,25 +40,49 @@ mod model_tests {
         });
     }
 
-    /*
     #[test]
     fn can_iterate_over_simple_tree() {
-        let tree: SgfGameTree = parse("(;B[dc];W[ef])").unwrap();
+        let tree: GameTree = parse("(;B[dc];W[ef])").unwrap();
         let mut iter = tree.iter();
 
-        assert_eq!(iter.next(), Some((&vec![SgfToken::Move(
-            Move {
-                stone: Stone::Black,
+        assert_eq!(iter.next(), Some(&GameNode {
+            tokens: vec![SgfToken::Move(Move {
+                color: Color::Black,
                 coordinate: (4, 3)
-            }
-        )], &vec![])));
-        assert_eq!(iter.next(), Some((&vec![SgfToken::Move(
-            Move {
-                stone: Stone::White,
+            })]
+        }));
+        assert_eq!(iter.next(), Some(&GameNode {
+            tokens: vec![SgfToken::Move(Move {
+                color: Color::White,
                 coordinate: (5, 6)
-            }
-        )], &vec![])));
+            })]
+        }));
         assert_eq!(iter.next(), None);
     }
-    */
+
+    #[test]
+    fn can_iterate_with_branch() {
+        let tree: GameTree = parse("(;B[dc];W[ef](;B[aa])(;B[cc]))").unwrap();
+        let mut iter = tree.iter();
+
+        assert_eq!(iter.next(), Some(&GameNode {
+            tokens: vec![SgfToken::Move(Move {
+                color: Color::Black,
+                coordinate: (4, 3)
+            })]
+        }));
+        assert_eq!(iter.next(), Some(&GameNode {
+            tokens: vec![SgfToken::Move(Move {
+                color: Color::White,
+                coordinate: (5, 6)
+            })]
+        }));
+        assert_eq!(iter.next(), Some(&GameNode {
+            tokens: vec![SgfToken::Move(Move {
+                color: Color::Black,
+                coordinate: (1, 1)
+            })]
+        }));
+        assert_eq!(iter.next(), None);
+    }
 }

@@ -244,4 +244,44 @@ impl GameTree {
         });
         invalids
     }
+
+    pub fn iter(&self) -> GameTreeIterator<'_> {
+        GameTreeIterator::new(self) 
+    }
+}
+
+pub struct GameTreeIterator<'a> {
+    tree: &'a GameTree,
+    index: usize,
+}
+
+impl<'a> GameTreeIterator<'a> {
+    fn new(game_tree: &'a GameTree) -> Self {
+        GameTreeIterator {
+            tree: game_tree,
+            index: 0
+        }
+    }
+}
+
+impl<'a> Iterator for GameTreeIterator<'a> {
+    type Item = &'a GameNode;
+
+    fn next(&mut self) -> Option<&'a GameNode> {
+        match self.tree.nodes.get(self.index) {
+            Some(node) => {
+                self.index = self.index + 1;
+                Some(&node)
+            }
+            None => {
+                if !self.tree.variations.is_empty() {
+                    self.tree = &self.tree.variations[0];
+                    self.index = 0;
+                    self.next()
+                } else {
+                    None
+                }
+            }
+        }
+    }
 }
