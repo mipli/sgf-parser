@@ -88,7 +88,7 @@ fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
         Rule::property => {
             let text_nodes = pair
                 .into_inner()
-                .map(|pair| parse_pair(pair))
+                .map(parse_pair)
                 .collect::<Vec<_>>();
             let (ident, value) = match &text_nodes[..] {
                 [ParserNode::Text(i), ParserNode::Text(v)] => (i, v),

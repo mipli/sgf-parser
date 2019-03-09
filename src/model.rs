@@ -29,7 +29,7 @@ pub struct Player {
 pub enum SgfToken {
     Move { color: Color, coordinate: (u8, u8) },
     Time { color: Color, time: u32 },
-    PlayerName { color: Color, rank: String },
+    PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
     Komi(f32),
     Event(String),
@@ -53,56 +53,56 @@ impl SgfToken {
         match ident.as_ref() {
             "B" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
-                    SgfToken::Move(Move {
+                    SgfToken::Move{
                         color: Color::Black,
                         coordinate,
-                    })
+                    }
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
             }
             "BL" => {
                 if let Ok(time) = value.parse() {
-                    SgfToken::Time(Time {
+                    SgfToken::Time {
                         color: Color::Black,
                         time,
-                    })
+                    }
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
             }
-            "PB" => SgfToken::PlayerName(Player {
+            "PB" => SgfToken::PlayerName {
                 color: Color::Black,
                 name: value.to_string(),
-            }),
+            },
             "BR" => SgfToken::PlayerRank {
                 color: Color::Black,
                 rank: value.to_string(),
             },
             "W" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
-                    SgfToken::Move(Move {
+                    SgfToken::Move {
                         color: Color::White,
                         coordinate,
-                    })
+                    }
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
             }
             "WL" => {
                 if let Ok(time) = value.parse() {
-                    SgfToken::Time(Time {
+                    SgfToken::Time {
                         color: Color::White,
                         time,
-                    })
+                    }
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
             }
-            "PW" => SgfToken::PlayerName(Player {
+            "PW" => SgfToken::PlayerName {
                 color: Color::White,
                 name: value.to_string(),
-            }),
+            },
             "WR" => SgfToken::PlayerRank {
                 color: Color::White,
                 rank: value.to_string(),

@@ -11,10 +11,10 @@ mod model_tests {
             *unknowns[0],
             GameNode {
                 tokens: vec![
-                    SgfToken::Move(Move {
+                    SgfToken::Move {
                         color: Color::White,
                         coordinate: (5, 6)
-                    }),
+                    },
                     SgfToken::Unknown(("AB".to_string(), "23".to_string()))
                 ]
             }
@@ -54,19 +54,19 @@ mod model_tests {
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::Black,
                     coordinate: (4, 3)
-                })]
+                }]
             })
         );
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::White,
                     coordinate: (5, 6)
-                })]
+                }]
             })
         );
         assert_eq!(iter.next(), None);
@@ -80,28 +80,28 @@ mod model_tests {
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::Black,
                     coordinate: (4, 3)
-                })]
+                }]
             })
         );
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::White,
                     coordinate: (5, 6)
-                })]
+                }]
             })
         );
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::Black,
                     coordinate: (1, 1)
-                })]
+                }]
             })
         );
         assert_eq!(iter.next(), None);
@@ -120,28 +120,28 @@ mod model_tests {
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::Black,
                     coordinate: (4, 3)
-                })]
+                }]
             })
         );
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::White,
                     coordinate: (5, 6)
-                })]
+                }]
             })
         );
         assert_eq!(
             iter.next(),
             Some(&GameNode {
-                tokens: vec![SgfToken::Move(Move {
+                tokens: vec![SgfToken::Move {
                     color: Color::Black,
                     coordinate: (3, 3)
-                })]
+                }]
             })
         );
         assert_eq!(iter.next(), None);

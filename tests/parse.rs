@@ -44,14 +44,14 @@ mod parser_tests {
             GameTree {
                 nodes: vec![GameNode {
                     tokens: vec![
-                        SgfToken::Move(Move {
+                        SgfToken::Move {
                             color: Color::Black,
                             coordinate: (4, 3)
-                        }),
-                        SgfToken::Time(Time {
+                        },
+                        SgfToken::Time {
                             color: Color::Black,
                             time: 3498
-                        })
+                        }
                     ],
                 }],
                 variations: vec![]
@@ -69,16 +69,16 @@ mod parser_tests {
             GameTree {
                 nodes: vec![
                     GameNode {
-                        tokens: vec![SgfToken::Move(Move {
+                        tokens: vec![SgfToken::Move {
                             color: Color::Black,
                             coordinate: (4, 3)
-                        }),],
+                        }],
                     },
                     GameNode {
-                        tokens: vec![SgfToken::Move(Move {
+                        tokens: vec![SgfToken::Move {
                             color: Color::White,
                             coordinate: (5, 6)
-                        }),],
+                        }],
                     }
                 ],
                 variations: vec![]
@@ -95,27 +95,27 @@ mod parser_tests {
             sgf,
             GameTree {
                 nodes: vec![GameNode {
-                    tokens: vec![SgfToken::Move(Move {
+                    tokens: vec![SgfToken::Move {
                         color: Color::Black,
                         coordinate: (1, 1)
-                    }),],
+                    }],
                 },],
                 variations: vec![
                     GameTree {
                         nodes: vec![GameNode {
-                            tokens: vec![SgfToken::Move(Move {
+                            tokens: vec![SgfToken::Move {
                                 color: Color::White,
                                 coordinate: (2, 2)
-                            }),],
+                            }],
                         },],
                         variations: vec![]
                     },
                     GameTree {
                         nodes: vec![GameNode {
-                            tokens: vec![SgfToken::Move(Move {
+                            tokens: vec![SgfToken::Move {
                                 color: Color::White,
                                 coordinate: (3, 3)
-                            }),],
+                            }],
                         },],
                         variations: vec![]
                     }
@@ -136,22 +136,22 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![
                             SgfToken::Event("event".to_string()),
-                            SgfToken::PlayerName(Player {
+                            SgfToken::PlayerName {
                                 color: Color::Black,
                                 name: "black".to_string()
-                            }),
-                            SgfToken::PlayerName(Player {
+                            },
+                            SgfToken::PlayerName {
                                 color: Color::White,
                                 name: "white".to_string()
-                            }),
+                            },
                             SgfToken::Comment("comment".to_string()),
                         ],
                     },
                     GameNode {
-                        tokens: vec![SgfToken::Move(Move {
+                        tokens: vec![SgfToken::Move {
                             color: Color::Black,
                             coordinate: (1, 1)
-                        }),],
+                        }],
                     }
                 ],
                 variations: vec![]
@@ -169,19 +169,19 @@ mod parser_tests {
             GameTree {
                 nodes: vec![
                     GameNode {
-                        tokens: vec![SgfToken::Move(Move {
+                        tokens: vec![SgfToken::Move {
                             color: Color::Black,
                             coordinate: (4, 3)
-                        }),],
+                        }],
                     },
                     GameNode {
                         tokens: vec![SgfToken::Unknown(("FO".to_string(), "asdf".to_string())),],
                     },
                     GameNode {
-                        tokens: vec![SgfToken::Move(Move {
+                        tokens: vec![SgfToken::Move {
                             color: Color::White,
                             coordinate: (5, 6)
-                        }),],
+                        }],
                     }
                 ],
                 variations: vec![]
