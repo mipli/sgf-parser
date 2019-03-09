@@ -6,24 +6,6 @@ pub enum Color {
     White,
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Move {
-    pub color: Color,
-    pub coordinate: (u8, u8),
-}
-
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Time {
-    pub color: Color,
-    pub time: u32,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Player {
-    pub color: Color,
-    pub name: String,
-}
-
 /// Enum describing all possible SGF Properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
