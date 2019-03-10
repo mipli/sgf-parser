@@ -1,253 +1,122 @@
-use nom::types::CompleteStr;
-use std::str::FromStr;
+use pest::Parser;
+
+use pest::iterators::Pair;
+use pest_derive::*;
 
 use crate::*;
 
-#[allow(dead_code)]
-fn str_to_coordinates(input: CompleteStr) -> Result<(u8, u8), std::string::ParseError> {
-    if input.len() != 2 {
-        return Ok((5, 5));
-    }
-    let coords = input
-        .to_lowercase()
-        .as_bytes()
-        .iter()
-        .map(convert_u8_to_coordinate)
-        .take(2)
-        .collect::<Vec<_>>();
-    Ok((coords[0], coords[1]))
-}
+#[derive(Parser)]
+#[grammar = "../sgf.pest"]
+struct SGFParser;
 
-fn convert_u8_to_coordinate(c: &u8) -> u8 {
-    let n = c - 96;
-    if n >= 9 {
-        n - 1
+///
+/// Main entry point to the library. Parses an SGF string, and returns a `GameTree`.
+///
+/// Returns an `SgfError` when parsing failed, but it tries to recover from most kind of invalid input and insert `SgfToken::Invalid` or `SgfToken::Unknown` rather than failing
+///
+/// ```rust
+/// use sgf_parser::*;
+///
+/// let tree: Result<GameTree, SgfError> = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa];W[bb])");
+///
+/// let tree = tree.unwrap();
+/// assert_eq!(tree.count_max_nodes(), 3);
+/// ```
+///
+pub fn parse(input: &str) -> Result<GameTree, SgfError> {
+    let mut parse_roots =
+        SGFParser::parse(Rule::game_tree, input).map_err(SgfError::parse_error)?;
+    if let Some(game_tree) = parse_roots.next() {
+        let tree = parse_pair(game_tree);
+        let game = create_game_tree(tree)?;
+        Ok(game)
     } else {
-        n
+        Ok(GameTree::default())
     }
 }
 
-#[allow(dead_code)]
-fn str_to_integer(input: CompleteStr) -> Result<u32, std::num::ParseIntError> {
-    input.parse::<u32>()
-}
-
-macro_rules! create_string_parser {
-    ($name:ident, $tag:expr, $token:expr) => {
-        named!($name(CompleteStr) -> SgfToken,
-        do_parse!(
-            tag!($tag) >>
-            value: parse_string_value >>
-            ($token(value.to_string()))
-        ));
-    }
-}
-
-macro_rules! create_f32_parser {
-    ($name:ident, $tag:expr, $token:expr) => {
-        named!($name(CompleteStr) -> SgfToken,
-        do_parse!(
-            tag!($tag) >>
-            value: parse_f32_value >>
-            ($token(value))
-        ));
-    }
-}
-
-macro_rules! create_u32_parser {
-    ($name:ident, $tag:expr, $token:expr) => {
-        named!($name(CompleteStr) -> SgfToken,
-        do_parse!(
-            tag!($tag) >>
-            value: parse_u32_value >>
-            ($token(value))
-        ));
-    }
-}
-
-named!(parse_f32_value(CompleteStr) -> f32,
-delimited!(tag!("["), call!(nom::float), tag!("]"))
-);
-
-named!(parse_u32_value(CompleteStr) -> u32,
-delimited!(tag!("["), map_res!(nom::digit, |CompleteStr(s)| u32::from_str(s)), tag!("]"))
-);
-
-named!(parse_string_value(CompleteStr) -> CompleteStr,
-do_parse!(
-    tag!("[") >>
-    value: take_until_and_consume!("]") >>
-    (value)
-));
-
-create_string_parser!(parse_game_name, "GN", SgfToken::GameName);
-create_string_parser!(parse_copyright, "CP", SgfToken::Copyright);
-create_string_parser!(parse_event, "EV", SgfToken::Event);
-create_string_parser!(parse_date, "DT", SgfToken::Date);
-create_string_parser!(parse_place, "PC", SgfToken::Place);
-create_string_parser!(parse_comment, "C", SgfToken::Comment);
-
-create_f32_parser!(parse_komi, "KM", SgfToken::Komi);
-
-create_u32_parser!(parse_size, "Size", SgfToken::Size);
-create_u32_parser!(parse_time_limit, "TM", SgfToken::TimeLimit);
-
-named!(parse_black_move(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("B") >>
-    data: parse_string_value >>
-    (SgfToken::Move(Move { stone: Stone::Black, coordinate: str_to_coordinates(data).unwrap() }))
-));
-
-named!(parse_black_time(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("BL") >>
-    time: parse_u32_value >>
-    (SgfToken::Time(Time { stone: Stone::Black, time: time }))
-));
-
-named!(parse_black_name(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("PB") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerName(Player { stone: Stone::Black, name: value.to_string() }))
-));
-
-named!(parse_black_rank(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("BR") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerRank(Rank { stone: Stone::Black, rank: value.to_string() }))
-));
-
-named!(parse_white_move(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("W") >>
-    data: parse_string_value >>
-    (SgfToken::Move(Move { stone: Stone::White, coordinate: str_to_coordinates(data).unwrap() }))
-));
-
-named!(parse_white_time(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("WL") >>
-    time: parse_u32_value >>
-    (SgfToken::Time(Time { stone: Stone::White, time: time }))
-));
-
-named!(parse_white_name(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("PW") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerName(Player { stone: Stone::White, name: value.to_string() }))
-));
-
-named!(parse_white_rank(CompleteStr) -> SgfToken,
-do_parse!(
-    tag!("WR") >>
-    value: parse_string_value >>
-    (SgfToken::PlayerRank(Rank { stone: Stone::White, rank: value.to_string() }))
-));
-
-named!(parse_token(CompleteStr) -> SgfToken,
-do_parse!(
-    token: alt!(
-        parse_game_name |
-        parse_copyright |
-        parse_event |
-        parse_date |
-        parse_place |
-        parse_comment |
-        parse_size |
-        parse_time_limit |
-        parse_black_move |
-        parse_black_time |
-        parse_black_name |
-        parse_black_rank |
-        parse_white_move |
-        parse_white_time |
-        parse_white_name |
-        parse_white_rank |
-        parse_komi |
-        parse_unknown ) >>
-    (token)
-));
-
-
-named!(parse_unknown(CompleteStr) -> SgfToken,
-do_parse!(
-    name: dbg!(recognize!(take_while!(tag_name_matcher))) >>
-    tag!("[") >>
-    value: dbg!(recognize!(take_while!(tag_value_matcher))) >>
-    tag!("]") >>
-    (SgfToken::Unknown(format!("{}[{}]", name.to_string(), value.to_string())))
-));
-
-fn tag_name_matcher(c: char) -> bool {
-    c.is_alphabetic()
-}
-
-fn tag_value_matcher(c: char) -> bool {
-    c != ']'
-}
-
-named!(parse_node(CompleteStr) -> SgfNode,
-do_parse!(
-    tag!(";") >>
-    tokens: many1!(parse_token) >>
-    (SgfNode {
-        tokens,
-        invalid: vec![],
-        children: vec![],
-    })
-));
-
-named!(parse_game_tree(CompleteStr) -> SgfGameTree,
-do_parse!(
-    root: delimited!(tag!("("), call!(parse_sgf_nodes), tag!(")")) >>
-    (SgfGameTree {
-        root
-    })
-));
-
-named!(parse_game_trees(CompleteStr) -> Vec<SgfGameTree>,
-    many1!(parse_game_tree)
-);
-
-fn parse_sgf_nodes(input: CompleteStr) -> Result<(CompleteStr, SgfNode), nom::Err<CompleteStr>> {
-    let (output, mut node) = parse_node(input)?;
-    let invalid = node.tokens.drain_filter(|t| {
-        match t {
-            SgfToken::Unknown(_) => true,
-            _ => false
+/// Creates a `GameTree` from the Pest result
+fn create_game_tree(parser_node: ParserNode<'_>) -> Result<GameTree, SgfError> {
+    if let ParserNode::GameTree(tree_nodes) = parser_node {
+        let mut nodes: Vec<GameNode> = vec![];
+        let mut variations: Vec<GameTree> = vec![];
+        for node in tree_nodes {
+            match node {
+                ParserNode::Sequence(sequence_nodes) => {
+                    nodes.extend(parse_sequence(sequence_nodes)?)
+                }
+                ParserNode::GameTree(_) => {
+                    variations.push(create_game_tree(node)?);
+                }
+                _ => {
+                    return Err(SgfErrorKind::ParseError.into());
+                }
+            }
         }
-    }).collect::<Vec<_>>();
-    node.invalid = invalid;
-    let remainder = match parse_sgf_nodes(output) {
-        Ok((rem, child)) => {
-            node.children.push(child);
-            rem
-        }
-        _ => output,
-    };
-    let remainder = match parse_game_trees(remainder) {
-        Ok((rem, mut trees)) => {
-            trees.drain(0..).for_each(|tree| { 
-                node.children.push(tree.root);
-            });
-            rem
-        }
-        _ => remainder
-    };
-
-    Ok((remainder, node))
+        Ok(GameTree { nodes, variations })
+    } else {
+        Err(SgfErrorKind::ParseError.into())
+    }
 }
 
-///
-/// Parse input and return a `SgfGameTree`
-///
-pub fn parse(input: &str) -> Result<SgfGameTree, ()> {
-    match parse_game_tree(CompleteStr(input)) {
-        Ok((_, tree)) => Ok(tree),
-        _ => Err(())
+/// Parses a sequence of nodes to be added to a `GameTree`
+fn parse_sequence(sequence_nodes: Vec<ParserNode<'_>>) -> Result<Vec<GameNode>, SgfError> {
+    let mut nodes = vec![];
+    for sequence_node in &sequence_nodes {
+        if let ParserNode::Node(node_tokens) = sequence_node {
+            let mut tokens: Vec<SgfToken> = vec![];
+            for t in node_tokens {
+                if let ParserNode::Token(token) = t {
+                    tokens.push(token.clone());
+                } else {
+                    return Err(SgfErrorKind::ParseError.into());
+                }
+            }
+            nodes.push(GameNode { tokens });
+        } else {
+            return Err(SgfErrorKind::ParseError.into());
+        }
+    }
+    Ok(nodes)
+}
+
+/// Intermediate nodes from parsing the SGF file
+#[derive(Debug, PartialEq, Clone)]
+enum ParserNode<'a> {
+    Token(SgfToken),
+    Text(&'a str),
+    Node(Vec<ParserNode<'a>>),
+    Sequence(Vec<ParserNode<'a>>),
+    GameTree(Vec<ParserNode<'a>>),
+}
+
+fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
+    match pair.as_rule() {
+        Rule::game_tree => {
+            ParserNode::GameTree(pair.into_inner().map(|pair| parse_pair(pair)).collect())
+        }
+        Rule::sequence => {
+            ParserNode::Sequence(pair.into_inner().map(|pair| parse_pair(pair)).collect())
+        }
+        Rule::node => ParserNode::Node(pair.into_inner().map(|pair| parse_pair(pair)).collect()),
+        Rule::property => {
+            let text_nodes = pair
+                .into_inner()
+                .map(parse_pair)
+                .collect::<Vec<_>>();
+            let (ident, value) = match &text_nodes[..] {
+                [ParserNode::Text(i), ParserNode::Text(v)] => (i, v),
+                _ => {
+                    panic!("Property node should only contain two text nodes");
+                }
+            };
+            ParserNode::Token(SgfToken::from_pair(ident, value))
+        }
+        Rule::property_identifier => ParserNode::Text(pair.as_str()),
+        Rule::property_value => {
+            let value = pair.as_str();
+            let end = value.len() - 1;
+            ParserNode::Text(&value[1..end])
+        }
     }
 }

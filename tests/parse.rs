@@ -1,161 +1,191 @@
 #[cfg(test)]
-mod tests {
+mod parser_tests {
     use sgf_parser::*;
 
     #[test]
     fn can_parse_komi() {
+        let sgf = parse("(;KM[6.5])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
         assert_eq!(
-            parse("(;KM[6.5])"),
-            Ok(SgfGameTree {
-                root: SgfNode {
-                    tokens: vec![
-                        SgfToken::Komi(6.5f32)
-                    ],
-                    invalid: vec![],
-                    children: vec![]
-                    }
-                })
+            sgf,
+            GameTree {
+                nodes: vec![GameNode {
+                    tokens: vec![SgfToken::Komi(6.5f32)]
+                }],
+                variations: vec![]
+            }
         );
     }
 
     #[test]
-    fn can_parse_game_tree() {
+    fn can_ignore_lowercase_characters() {
+        let sgf = parse("(;CopyRight[2017])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
         assert_eq!(
-            parse("(;B[dc]BL[3498])"),
-            Ok(SgfGameTree {
-                root: SgfNode {
+            sgf,
+            GameTree {
+                nodes: vec![GameNode {
+                    tokens: vec![SgfToken::Copyright("2017".to_string())],
+                }],
+                variations: vec![]
+            }
+        );
+    }
+
+    #[test]
+    fn can_parse_game_tree_single_node() {
+        let sgf = parse("(;B[dc]BL[3498])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(
+            sgf,
+            GameTree {
+                nodes: vec![GameNode {
                     tokens: vec![
-                        SgfToken::Move(Move {
-                            stone: Stone::Black,
+                        SgfToken::Move {
+                            color: Color::Black,
                             coordinate: (4, 3)
-                        }),
-                        SgfToken::Time(Time {
-                            stone: Stone::Black,
+                        },
+                        SgfToken::Time {
+                            color: Color::Black,
                             time: 3498
-                        })
+                        }
                     ],
-                    invalid: vec![],
-                    children: vec![]
-                }
-            })
+                }],
+                variations: vec![]
+            }
         );
     }
 
     #[test]
     fn can_parse_game_tree_two_nodes() {
+        let sgf = parse("(;B[dc];W[ef])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
         assert_eq!(
-            parse("(;B[dc];W[ef])"),
-            Ok(SgfGameTree {
-                root: SgfNode {
-                    tokens: vec![SgfToken::Move(Move {
-                        stone: Stone::Black,
-                        coordinate: (4, 3)
-                    })],
-                    invalid: vec![],
-                    children: vec![SgfNode {
-                        tokens: vec![SgfToken::Move(Move {
-                            stone: Stone::White,
+            sgf,
+            GameTree {
+                nodes: vec![
+                    GameNode {
+                        tokens: vec![SgfToken::Move {
+                            color: Color::Black,
+                            coordinate: (4, 3)
+                        }],
+                    },
+                    GameNode {
+                        tokens: vec![SgfToken::Move {
+                            color: Color::White,
                             coordinate: (5, 6)
-                        })],
-                        invalid: vec![],
-                        children: vec![]
-                    }]
-                }
-            })
+                        }],
+                    }
+                ],
+                variations: vec![]
+            }
         );
     }
 
     #[test]
     fn can_parse_game_tree_simple_branch() {
+        let sgf = parse("(;B[aa](;W[bb])(;W[cc]))");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
         assert_eq!(
-            parse("(;B[aa](;W[bb])(;W[cc]))"),
-            Ok(SgfGameTree {
-                root: SgfNode {
-                    tokens: vec![SgfToken::Move(Move {
-                        stone: Stone::Black,
+            sgf,
+            GameTree {
+                nodes: vec![GameNode {
+                    tokens: vec![SgfToken::Move {
+                        color: Color::Black,
                         coordinate: (1, 1)
-                    })],
-                    invalid: vec![],
-                    children: vec![
-                        SgfNode {
-                            tokens: vec![SgfToken::Move(Move {
-                                stone: Stone::White,
+                    }],
+                },],
+                variations: vec![
+                    GameTree {
+                        nodes: vec![GameNode {
+                            tokens: vec![SgfToken::Move {
+                                color: Color::White,
                                 coordinate: (2, 2)
-                            })],
-                            invalid: vec![],
-                            children: vec![]
-                        },
-                        SgfNode {
-                            tokens: vec![SgfToken::Move(Move {
-                                stone: Stone::White,
+                            }],
+                        },],
+                        variations: vec![]
+                    },
+                    GameTree {
+                        nodes: vec![GameNode {
+                            tokens: vec![SgfToken::Move {
+                                color: Color::White,
                                 coordinate: (3, 3)
-                            })],
-                            invalid: vec![],
-                            children: vec![]
-                        }
-                    ]
-                }
-            })
+                            }],
+                        },],
+                        variations: vec![]
+                    }
+                ]
+            }
         );
     }
 
     #[test]
     fn can_parse_game_information() {
+        let sgf = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
         assert_eq!(
-            parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])"),
-            Ok(SgfGameTree {
-                root: SgfNode {
-                    tokens: vec![
-                        SgfToken::Event("event".to_string()),
-                        SgfToken::PlayerName(Player {
-                            stone: Stone::Black,
-                            name: "black".to_string()
-                        }),
-                        SgfToken::PlayerName(Player {
-                            stone: Stone::White,
-                            name: "white".to_string()
-                        }),
-                        SgfToken::Comment("comment".to_string()),
-                    ],
-                    invalid: vec![],
-                    children: vec![SgfNode {
-                        tokens: vec![SgfToken::Move(Move {
-                            stone: Stone::Black,
+            sgf,
+            GameTree {
+                nodes: vec![
+                    GameNode {
+                        tokens: vec![
+                            SgfToken::Event("event".to_string()),
+                            SgfToken::PlayerName {
+                                color: Color::Black,
+                                name: "black".to_string()
+                            },
+                            SgfToken::PlayerName {
+                                color: Color::White,
+                                name: "white".to_string()
+                            },
+                            SgfToken::Comment("comment".to_string()),
+                        ],
+                    },
+                    GameNode {
+                        tokens: vec![SgfToken::Move {
+                            color: Color::Black,
                             coordinate: (1, 1)
-                        })],
-                        invalid: vec![],
-                        children: vec![]
-                    }]
-                }
-            })
+                        }],
+                    }
+                ],
+                variations: vec![]
+            }
         );
     }
 
     #[test]
     fn can_parse_unkown_tags() {
+        let sgf = parse("(;B[dc];FO[asdf];W[ef])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
         assert_eq!(
-            parse("(;B[dc];FO[asdf];W[ef])"),
-            Ok(SgfGameTree {
-                root: SgfNode {
-                    tokens: vec![SgfToken::Move(Move {
-                        stone: Stone::Black,
-                        coordinate: (4, 3)
-                    })],
-                    invalid: vec![],
-                    children: vec![SgfNode {
-                        tokens: vec![],
-                        invalid: vec![SgfToken::Unknown("FO[asdf]".to_string())],
-                        children: vec![SgfNode {
-                            tokens: vec![SgfToken::Move(Move {
-                                stone: Stone::White,
-                                coordinate: (5, 6)
-                            })],
-                            invalid: vec![],
-                            children: vec![]
-                        }]
-                    }]
-                }
-            })
+            sgf,
+            GameTree {
+                nodes: vec![
+                    GameNode {
+                        tokens: vec![SgfToken::Move {
+                            color: Color::Black,
+                            coordinate: (4, 3)
+                        }],
+                    },
+                    GameNode {
+                        tokens: vec![SgfToken::Unknown(("FO".to_string(), "asdf".to_string())),],
+                    },
+                    GameNode {
+                        tokens: vec![SgfToken::Move {
+                            color: Color::White,
+                            coordinate: (5, 6)
+                        }],
+                    }
+                ],
+                variations: vec![]
+            }
         );
     }
 }

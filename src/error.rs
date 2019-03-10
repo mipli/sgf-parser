@@ -1,31 +1,50 @@
-use std::error;
-use std::fmt;
+use derive_more::*;
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum Error {
-    InvalidProperty(String),
-    Unkown
+use std::error::Error;
+
+/// SGF parsing, or traversal, related errors
+#[derive(Debug, Display)]
+#[display(fmt = "{}", kind)]
+pub struct SgfError {
+    pub kind: SgfErrorKind,
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use self::Error::*;
-        use std::error::Error;
+/// Describes what kind of error we're dealing with
+#[derive(Debug, Display, Eq, PartialEq)]
+pub enum SgfErrorKind {
+    #[display(fmt = "Error parsing SGF file")]
+    ParseError,
+    #[display(fmt = "Variation not found")]
+    VariationNotFound,
+}
 
-        match *self {
-            InvalidProperty(ref prop) => write!(f, "{}: ({})", self.description(), prop),
-            Unkown => write!(f, "{}", self.description())
-        }
+impl Error for SgfError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.source
+            .as_ref()
+            .map(|boxed| boxed.as_ref() as &(dyn Error + 'static))
     }
 }
 
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        use self::Error::*;
+impl From<SgfErrorKind> for SgfError {
+    fn from(kind: SgfErrorKind) -> SgfError {
+        SgfError { kind, source: None }
+    }
+}
 
-        match *self {
-            InvalidProperty(_) => "Invalid property value",
-            Unkown => "Uknown error",
+impl SgfError {
+    pub fn parse_error(err: impl Error + Send + Sync + 'static) -> Self {
+        SgfError {
+            kind: SgfErrorKind::ParseError,
+            source: Some(Box::new(err)),
+        }
+    }
+
+    pub fn variation_not_found(err: impl Error + Send + Sync + 'static) -> Self {
+        SgfError {
+            kind: SgfErrorKind::VariationNotFound,
+            source: Some(Box::new(err)),
         }
     }
 }
