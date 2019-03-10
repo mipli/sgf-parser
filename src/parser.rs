@@ -6,7 +6,7 @@ use pest_derive::*;
 use crate::*;
 
 #[derive(Parser)]
-#[grammar = "/home/michael/code/rust/sgf-parser/parser.pest"]
+#[grammar = "../sgf.pest"]
 struct SGFParser;
 
 ///
