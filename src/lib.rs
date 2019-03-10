@@ -2,7 +2,7 @@
 //!
 //! A sgf parser for rust. Supports all SGF properties, and tree branching.
 //!
-//! Usin `pest` for the actual parsing part.
+//! Using `pest` for the actual parsing part.
 //!
 //!
 //! ## Coming features
@@ -32,9 +32,13 @@
 #![deny(rust_2018_idioms)]
 
 mod error;
-mod model;
+mod token;
 mod parser;
+mod node;
+mod tree;
 
 pub use crate::error::{SgfError, SgfErrorKind};
-pub use crate::model::*;
+pub use crate::tree::{GameTree};
+pub use crate::token::{Color, SgfToken};
+pub use crate::node::{GameNode};
 pub use crate::parser::parse;

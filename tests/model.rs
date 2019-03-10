@@ -113,7 +113,7 @@ mod model_tests {
         let mut iter = tree.iter();
 
         assert!(iter.has_variations());
-        assert_eq!(iter.count_varations(), 2);
+        assert_eq!(iter.count_variations(), 2);
 
         assert!(iter.pick_variation(1).is_ok());
 

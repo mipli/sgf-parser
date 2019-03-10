@@ -10,7 +10,18 @@ use crate::*;
 struct SGFParser;
 
 ///
-/// Parse input and return a `SgfGameTree`
+/// Main entry point to the library. Parses an SGF string, and returns a `GameTree`.
+///
+/// Returns an `SgfError` when parsing failed, but it tries to recover from most kind of invalid input and insert `SgfToken::Invalid` or `SgfToken::Unknown` rather than failing
+///
+/// ```rust
+/// use sgf_parser::*;
+///
+/// let tree: Result<GameTree, SgfError> = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa];W[bb])");
+///
+/// let tree = tree.unwrap();
+/// assert_eq!(tree.count_max_nodes(), 3);
+/// ```
 ///
 pub fn parse(input: &str) -> Result<GameTree, SgfError> {
     let mut parse_roots =
@@ -24,26 +35,7 @@ pub fn parse(input: &str) -> Result<GameTree, SgfError> {
     }
 }
 
-fn parse_sequence(sequence_nodes: Vec<ParserNode<'_>>) -> Result<Vec<GameNode>, SgfError> {
-    let mut nodes = vec![];
-    for sequence_node in &sequence_nodes {
-        if let ParserNode::Node(node_tokens) = sequence_node {
-            let mut tokens: Vec<SgfToken> = vec![];
-            for t in node_tokens {
-                if let ParserNode::Token(token) = t {
-                    tokens.push(token.clone());
-                } else {
-                    return Err(SgfErrorKind::ParseError.into());
-                }
-            }
-            nodes.push(GameNode { tokens });
-        } else {
-            return Err(SgfErrorKind::ParseError.into());
-        }
-    }
-    Ok(nodes)
-}
-
+/// Creates a `GameTree` from the Pest result
 fn create_game_tree(parser_node: ParserNode<'_>) -> Result<GameTree, SgfError> {
     if let ParserNode::GameTree(tree_nodes) = parser_node {
         let mut nodes: Vec<GameNode> = vec![];
@@ -67,6 +59,28 @@ fn create_game_tree(parser_node: ParserNode<'_>) -> Result<GameTree, SgfError> {
     }
 }
 
+/// Parses a sequence of nodes to be added to a `GameTree`
+fn parse_sequence(sequence_nodes: Vec<ParserNode<'_>>) -> Result<Vec<GameNode>, SgfError> {
+    let mut nodes = vec![];
+    for sequence_node in &sequence_nodes {
+        if let ParserNode::Node(node_tokens) = sequence_node {
+            let mut tokens: Vec<SgfToken> = vec![];
+            for t in node_tokens {
+                if let ParserNode::Token(token) = t {
+                    tokens.push(token.clone());
+                } else {
+                    return Err(SgfErrorKind::ParseError.into());
+                }
+            }
+            nodes.push(GameNode { tokens });
+        } else {
+            return Err(SgfErrorKind::ParseError.into());
+        }
+    }
+    Ok(nodes)
+}
+
+/// Intermediate nodes from parsing the SGF file
 #[derive(Debug, PartialEq, Clone)]
 enum ParserNode<'a> {
     Token(SgfToken),
