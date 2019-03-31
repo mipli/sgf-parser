@@ -140,6 +140,70 @@ impl SgfToken {
     }
 }
 
+impl Into<String> for SgfToken {
+    fn into(self) -> String {
+        match self {
+            SgfToken::Move{color, coordinate} => {
+                let token = match color {
+                    Color::Black => "B",
+                    Color::White => "W"
+                };
+                let value = coordinate_to_str(coordinate);
+                format!("{}[{}]", token, value)
+            },
+            SgfToken::Time{color, time} => {
+                let token = match color {
+                    Color::Black => "BL",
+                    Color::White => "WL"
+                };
+                format!("{}[{}]", token, time)
+            },
+            SgfToken::PlayerName{color, name} => {
+                let token = match color {
+                    Color::Black => "PB",
+                    Color::White => "PW"
+                };
+                format!("{}[{}]", token, name)
+            },
+            SgfToken::PlayerRank{color, rank} => {
+                let token = match color {
+                    Color::Black => "BR",
+                    Color::White => "WR"
+                };
+                format!("{}[{}]", token, rank)
+            },
+            SgfToken::Komi(komi) => format!("KM[{}]", komi),
+            SgfToken::Size(size) => format!("SZ[{}]", size),
+            SgfToken::TimeLimit(time) => format!("TM[{}]", time),
+            SgfToken::Event(value) => format!("EV[{}]", value),
+            SgfToken::Comment(value) => format!("C[{}]", value),
+            SgfToken::GameName(value) => format!("GN[{}]", value),
+            SgfToken::Copyright(value) => format!("CR[{}]", value),
+            SgfToken::Date(value) => format!("DT[{}]", value),
+            SgfToken::Place(value) => format!("PC[{}]", value),
+            _ => panic!()
+        }
+    }
+}
+
+/// Converts goban coordinates to string representation
+/// skips 'I' as a valid coordinate
+fn coordinate_to_str(coordinate: (u8, u8)) -> String {
+    let x = coordinate.0 + if coordinate.0 >=9 {
+        97
+    } else {
+        96
+    };
+    let y = coordinate.1 + if coordinate.1 >=9 {
+        97
+    } else {
+        96
+    };
+    let mut out = (x as char).to_string();
+    out.push(y as char);
+    out
+}
+
 /// Converts a string describing goban coordinates to numeric coordinates
 /// skips 'I' as a valid coordinate
 fn str_to_coordinates(input: &str) -> Result<(u8, u8), SgfError> {
