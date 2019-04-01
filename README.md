@@ -12,7 +12,6 @@ Using `pest` for the actual parsing part.
 
 - reading marks
 - support proper escaping of text strings in token values
-- support converting back to SGF
 
 # Example usage
 ```rust

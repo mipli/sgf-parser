@@ -36,3 +36,18 @@ impl GameNode {
             .collect::<Vec<_>>()
     }
 }
+
+impl Into<String> for &GameNode {
+    fn into(self) -> String {
+        self.tokens.iter().fold(";".to_string(), |out, token| {
+            let s: String = token.into();
+            format!("{}{}", out, s)
+        })
+    }
+}
+
+impl Into<String> for GameNode {
+    fn into(self) -> String {
+        (&self).into()
+    }
+}

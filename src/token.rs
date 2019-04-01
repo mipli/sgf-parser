@@ -140,7 +140,7 @@ impl SgfToken {
     }
 }
 
-impl Into<String> for SgfToken {
+impl Into<String> for &SgfToken {
     fn into(self) -> String {
         match self {
             SgfToken::Move{color, coordinate} => {
@@ -148,7 +148,7 @@ impl Into<String> for SgfToken {
                     Color::Black => "B",
                     Color::White => "W"
                 };
-                let value = coordinate_to_str(coordinate);
+                let value = coordinate_to_str(*coordinate);
                 format!("{}[{}]", token, value)
             },
             SgfToken::Time{color, time} => {
@@ -186,22 +186,25 @@ impl Into<String> for SgfToken {
     }
 }
 
+impl Into<String> for SgfToken {
+    fn into(self) -> String {
+        (&self).into()
+    }
+}
+
 /// Converts goban coordinates to string representation
-/// skips 'I' as a valid coordinate
 fn coordinate_to_str(coordinate: (u8, u8)) -> String {
-    let x = coordinate.0 + if coordinate.0 >=9 {
-        97
-    } else {
-        96
+    let conv = |n| {
+        // skips 'I' as a valid coordinate
+        n + if n >= 9 {
+            97
+        } else {
+            96
+        }
     };
-    let y = coordinate.1 + if coordinate.1 >=9 {
-        97
-    } else {
-        96
-    };
-    let mut out = (x as char).to_string();
-    out.push(y as char);
-    out
+    let x = conv(coordinate.0) as char;
+    let y = conv(coordinate.1) as char;
+    [x, y].iter().collect()
 }
 
 /// Converts a string describing goban coordinates to numeric coordinates
@@ -220,9 +223,10 @@ fn str_to_coordinates(input: &str) -> Result<(u8, u8), SgfError> {
     Ok((coords[0], coords[1]))
 }
 
-/// Converts a u8 char to numeric coordinates, skips 'I' as a valid coordinate
+/// Converts a u8 char to numeric coordinates
 fn convert_u8_to_coordinate(c: u8) -> u8 {
     let n = c - 96;
+    // skips 'I' as a valid coordinate
     if n >= 9 {
         n - 1
     } else {
