@@ -119,6 +119,14 @@ mod token_tests {
     }
 
     #[test]
+    fn can_parse_comment_token_with_escpaed_chars() {
+        let token = SgfToken::from_pair("C", "a [wrapped\\] comment");
+        assert_eq!(token, SgfToken::Comment("a [wrapped\\] comment".to_string()));
+        let string_token: String = token.into();
+        assert_eq!(string_token, "C[a [wrapped\\] comment]");
+    }
+
+    #[test]
     fn can_parse_game_name_tokens() {
         let token = SgfToken::from_pair("GN", "game name");
         assert_eq!(token, SgfToken::GameName("game name".to_string()));

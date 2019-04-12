@@ -11,7 +11,6 @@ Using `pest` for the actual parsing part.
 ## Coming features
 
 - reading marks
-- support proper escaping of text strings in token values
 
 # Example usage
 ```rust

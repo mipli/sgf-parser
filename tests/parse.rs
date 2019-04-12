@@ -188,4 +188,24 @@ mod parser_tests {
             }
         );
     }
+
+    #[test]
+    fn can_parse_wrapped_comment() {
+        let sgf = parse("(;C[a [wrapped\\] comment])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(
+            sgf,
+            GameTree {
+                nodes: vec![
+                    GameNode {
+                        tokens: vec![
+                            SgfToken::Comment("a [wrapped\\] comment".to_string()),
+                        ],
+                    },
+                ],
+                variations: vec![]
+            }
+        );
+    }
 }

@@ -117,6 +117,12 @@ fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
             let value = pair.as_str();
             let end = value.len() - 1;
             ParserNode::Text(&value[1..end])
-        }
+        },
+        Rule::inner => {
+            unreachable!();
+        },
+        Rule::char => {
+            unreachable!();
+        },
     }
 }
