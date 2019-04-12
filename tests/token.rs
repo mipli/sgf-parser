@@ -176,9 +176,9 @@ mod token_tests {
 
     #[test]
     fn can_parse_mark_label_tokens() {
-        let token = SgfToken::from_pair("LB", "kk:f");
-        assert_eq!(token, SgfToken::Label{label: "f".to_string(), coordinate: (10, 10)});
+        let token = SgfToken::from_pair("LB", "kk:foo");
+        assert_eq!(token, SgfToken::Label{label: "foo".to_string(), coordinate: (10, 10)});
         let string_token: String = token.into();
-        assert_eq!(string_token, "LB[kk:f]");
+        assert_eq!(string_token, "LB[kk:foo]");
     }
 }
