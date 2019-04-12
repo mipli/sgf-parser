@@ -12,13 +12,13 @@ Using `pest` for the actual parsing part.
 
 - reading marks
 - support proper escaping of text strings in token values
-- support converting back to SGF
 
 # Example usage
 ```rust
 use sgf_parser::*;
 
-let tree: Result<GameTree, SgfError> = parse("(;EV[event]PB[black]PW[white]C[comment];B[aa])");
+let sgf_source = "(;EV[event]PB[black]PW[white]C[comment];B[aa])";
+let tree: Result<GameTree, SgfError> = parse(sgf_source);
 
 let tree = tree.unwrap();
 let unknown_nodes = tree.get_unknown_nodes();
@@ -30,4 +30,7 @@ assert_eq!(invalid_nodes.len(), 0);
 tree.iter().for_each(|node| {
   assert!(!node.tokens.is_empty());
 });
+
+let sgf_string: String = tree.into();
+assert_eq!(sgf_source, sgf_string());
 ```

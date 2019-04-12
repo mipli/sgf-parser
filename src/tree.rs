@@ -155,6 +155,30 @@ impl GameTree {
     }
 }
 
+impl Into<String> for &GameTree {
+    fn into(self) -> String {
+        let nodes = self.nodes
+            .iter()
+            .map(|n| -> String {
+                n.into()
+            })
+            .collect::<String>();
+        let variations = self.variations
+            .iter()
+            .map(|n| -> String {
+                n.into()
+            })
+            .collect::<String>();
+        format!("({}{})", nodes, variations)
+    }
+}
+
+impl Into<String> for GameTree {
+    fn into(self) -> String {
+        (&self).into()
+    }
+}
+
 pub struct GameTreeIterator<'a> {
     tree: &'a GameTree,
     index: usize,
