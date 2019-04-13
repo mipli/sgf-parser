@@ -25,6 +25,9 @@ pub enum SgfToken {
     Comment(String),
     Unknown((String, String)),
     Invalid((String, String)),
+    Square { coordinate: (u8, u8) },
+    Triangle { coordinate: (u8, u8) },
+    Label { label: String, coordinate: (u8, u8) },
 }
 
 impl SgfToken {
@@ -52,6 +55,38 @@ impl SgfToken {
             .filter(|c| c.is_uppercase())
             .collect::<String>();
         match ident.as_ref() {
+            "LB" => {
+                if value.len() >= 4 {
+                    let (coord, label) = value.split_at(2);
+                    if label.len() >= 2 {
+                        if let Ok(coordinate) = str_to_coordinates(coord) {
+                            return SgfToken::Label{
+                                label: label[1..].to_string(),
+                                coordinate,
+                            };
+                        }
+                    }
+                }
+                SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+            },
+            "SQ" => {
+                if let Ok(coordinate) = str_to_coordinates(value) {
+                    SgfToken::Square{
+                        coordinate,
+                    }
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
+            },
+            "TR" => {
+                if let Ok(coordinate) = str_to_coordinates(value) {
+                    SgfToken::Triangle{
+                        coordinate,
+                    }
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
+            },
             "B" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
                     SgfToken::Move{
@@ -61,7 +96,7 @@ impl SgfToken {
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            }
+            },
             "BL" => {
                 if let Ok(time) = value.parse() {
                     SgfToken::Time {
@@ -71,7 +106,7 @@ impl SgfToken {
                 } else {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
-            }
+            },
             "PB" => SgfToken::PlayerName {
                 color: Color::Black,
                 name: value.to_string(),
@@ -143,6 +178,18 @@ impl SgfToken {
 impl Into<String> for &SgfToken {
     fn into(self) -> String {
         match self {
+            SgfToken::Label{label, coordinate} => {
+                let value = coordinate_to_str(*coordinate);
+                format!("LB[{}:{}]", value, label)
+            },
+            SgfToken::Square{coordinate} => {
+                let value = coordinate_to_str(*coordinate);
+                format!("SQ[{}]", value)
+            }
+            SgfToken::Triangle{coordinate} => {
+                let value = coordinate_to_str(*coordinate);
+                format!("TR[{}]", value)
+            }
             SgfToken::Move{color, coordinate} => {
                 let token = match color {
                     Color::Black => "B",

@@ -157,4 +157,28 @@ mod token_tests {
         let string_token: String = token.into();
         assert_eq!(string_token, "PC[place]");
     }
+
+    #[test]
+    fn can_parse_mark_triangle_tokens() {
+        let token = SgfToken::from_pair("TR", "aa");
+        assert_eq!(token, SgfToken::Triangle{coordinate: (1, 1)});
+        let string_token: String = token.into();
+        assert_eq!(string_token, "TR[aa]");
+    }
+
+    #[test]
+    fn can_parse_mark_square_tokens() {
+        let token = SgfToken::from_pair("SQ", "aa");
+        assert_eq!(token, SgfToken::Square{coordinate: (1, 1)});
+        let string_token: String = token.into();
+        assert_eq!(string_token, "SQ[aa]");
+    }
+
+    #[test]
+    fn can_parse_mark_label_tokens() {
+        let token = SgfToken::from_pair("LB", "kk:foo");
+        assert_eq!(token, SgfToken::Label{label: "foo".to_string(), coordinate: (10, 10)});
+        let string_token: String = token.into();
+        assert_eq!(string_token, "LB[kk:foo]");
+    }
 }
