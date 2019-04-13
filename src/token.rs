@@ -10,6 +10,7 @@ pub enum Color {
 /// Enum describing all possible SGF Properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
+    Add { color: Color, coordinate: (u8, u8) },
     Move { color: Color, coordinate: (u8, u8) },
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
@@ -87,6 +88,16 @@ impl SgfToken {
                     SgfToken::Invalid((base_ident.to_string(), value.to_string()))
                 }
             },
+            "AB" => {
+                if let Ok(coordinate) = str_to_coordinates(value) {
+                    SgfToken::Add{
+                        color: Color::Black,
+                        coordinate,
+                    }
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
+            },
             "B" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
                     SgfToken::Move{
@@ -115,6 +126,16 @@ impl SgfToken {
                 color: Color::Black,
                 rank: value.to_string(),
             },
+            "AW" => {
+                if let Ok(coordinate) = str_to_coordinates(value) {
+                    SgfToken::Add{
+                        color: Color::White,
+                        coordinate,
+                    }
+                } else {
+                    SgfToken::Invalid((base_ident.to_string(), value.to_string()))
+                }
+            }
             "W" => {
                 if let Ok(coordinate) = str_to_coordinates(value) {
                     SgfToken::Move {
@@ -190,6 +211,14 @@ impl Into<String> for &SgfToken {
                 let value = coordinate_to_str(*coordinate);
                 format!("TR[{}]", value)
             }
+            SgfToken::Add{color, coordinate} => {
+                let token = match color {
+                    Color::Black => "AB",
+                    Color::White => "AW"
+                };
+                let value = coordinate_to_str(*coordinate);
+                format!("{}[{}]", token, value)
+            },
             SgfToken::Move{color, coordinate} => {
                 let token = match color {
                     Color::Black => "B",

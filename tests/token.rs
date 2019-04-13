@@ -181,4 +181,23 @@ mod token_tests {
         let string_token: String = token.into();
         assert_eq!(string_token, "LB[kk:foo]");
     }
+
+    #[test]
+    fn can_parse_add_tokens() {
+        let token = SgfToken::from_pair("AB", "aa");
+        assert_eq!(token, SgfToken::Add{
+            color: Color::Black,
+            coordinate: (1, 1),
+        });
+        let string_token: String = token.into();
+        assert_eq!(string_token, "AB[aa]");
+
+        let token = SgfToken::from_pair("AW", "kk");
+        assert_eq!(token, SgfToken::Add{
+            color: Color::White,
+            coordinate: (10, 10),
+        });
+        let string_token: String = token.into();
+        assert_eq!(string_token, "AW[kk]");
+    }
 }
