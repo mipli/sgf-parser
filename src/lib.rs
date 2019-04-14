@@ -4,12 +4,6 @@
 //!
 //! Using `pest` for the actual parsing part.
 //!
-//!
-//! ## Coming features
-//!
-//! - reading marks
-//! - support converting back to SGF
-//!
 //! # Example usage
 //! ```rust
 //! use sgf_parser::*;
