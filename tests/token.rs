@@ -5,18 +5,24 @@ mod token_tests {
     #[test]
     fn can_parse_move_tokens() {
         let token = SgfToken::from_pair("B", "aa");
-        assert_eq!(token, SgfToken::Move{
-            color: Color::Black,
-            coordinate: (1, 1),
-        });
+        assert_eq!(
+            token,
+            SgfToken::Move {
+                color: Color::Black,
+                coordinate: (1, 1),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "B[aa]");
 
         let token = SgfToken::from_pair("W", "kk");
-        assert_eq!(token, SgfToken::Move{
-            color: Color::White,
-            coordinate: (10, 10),
-        });
+        assert_eq!(
+            token,
+            SgfToken::Move {
+                color: Color::White,
+                coordinate: (10, 10),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "W[kk]");
     }
@@ -24,18 +30,24 @@ mod token_tests {
     #[test]
     fn can_parse_time_tokens() {
         let token = SgfToken::from_pair("BL", "1234");
-        assert_eq!(token, SgfToken::Time{
-            color: Color::Black,
-            time: 1234,
-        });
+        assert_eq!(
+            token,
+            SgfToken::Time {
+                color: Color::Black,
+                time: 1234,
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "BL[1234]");
 
         let token = SgfToken::from_pair("WL", "34");
-        assert_eq!(token, SgfToken::Time{
-            color: Color::White,
-            time: 34,
-        });
+        assert_eq!(
+            token,
+            SgfToken::Time {
+                color: Color::White,
+                time: 34,
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "WL[34]");
     }
@@ -43,18 +55,24 @@ mod token_tests {
     #[test]
     fn can_parse_name_tokens() {
         let token = SgfToken::from_pair("PB", "Honinbo Shusai");
-        assert_eq!(token, SgfToken::PlayerName{
-            color: Color::Black,
-            name: "Honinbo Shusai".to_string(),
-        });
+        assert_eq!(
+            token,
+            SgfToken::PlayerName {
+                color: Color::Black,
+                name: "Honinbo Shusai".to_string(),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "PB[Honinbo Shusai]");
 
         let token = SgfToken::from_pair("PW", "Cho Chikun");
-        assert_eq!(token, SgfToken::PlayerName{
-            color: Color::White,
-            name: "Cho Chikun".to_string(),
-        });
+        assert_eq!(
+            token,
+            SgfToken::PlayerName {
+                color: Color::White,
+                name: "Cho Chikun".to_string(),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "PW[Cho Chikun]");
     }
@@ -62,18 +80,24 @@ mod token_tests {
     #[test]
     fn can_parse_rank_tokens() {
         let token = SgfToken::from_pair("BR", "3p");
-        assert_eq!(token, SgfToken::PlayerRank{
-            color: Color::Black,
-            rank: "3p".to_string(),
-        });
+        assert_eq!(
+            token,
+            SgfToken::PlayerRank {
+                color: Color::Black,
+                rank: "3p".to_string(),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "BR[3p]");
 
         let token = SgfToken::from_pair("WR", "5 kyu");
-        assert_eq!(token, SgfToken::PlayerRank{
-            color: Color::White,
-            rank: "5 kyu".to_string(),
-        });
+        assert_eq!(
+            token,
+            SgfToken::PlayerRank {
+                color: Color::White,
+                rank: "5 kyu".to_string(),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "WR[5 kyu]");
     }
@@ -121,7 +145,10 @@ mod token_tests {
     #[test]
     fn can_parse_comment_token_with_escpaed_chars() {
         let token = SgfToken::from_pair("C", "a [wrapped\\] comment");
-        assert_eq!(token, SgfToken::Comment("a [wrapped\\] comment".to_string()));
+        assert_eq!(
+            token,
+            SgfToken::Comment("a [wrapped\\] comment".to_string())
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "C[a [wrapped\\] comment]");
     }
@@ -161,7 +188,7 @@ mod token_tests {
     #[test]
     fn can_parse_mark_triangle_tokens() {
         let token = SgfToken::from_pair("TR", "aa");
-        assert_eq!(token, SgfToken::Triangle{coordinate: (1, 1)});
+        assert_eq!(token, SgfToken::Triangle { coordinate: (1, 1) });
         let string_token: String = token.into();
         assert_eq!(string_token, "TR[aa]");
     }
@@ -169,7 +196,7 @@ mod token_tests {
     #[test]
     fn can_parse_mark_square_tokens() {
         let token = SgfToken::from_pair("SQ", "aa");
-        assert_eq!(token, SgfToken::Square{coordinate: (1, 1)});
+        assert_eq!(token, SgfToken::Square { coordinate: (1, 1) });
         let string_token: String = token.into();
         assert_eq!(string_token, "SQ[aa]");
     }
@@ -177,7 +204,13 @@ mod token_tests {
     #[test]
     fn can_parse_mark_label_tokens() {
         let token = SgfToken::from_pair("LB", "kk:foo");
-        assert_eq!(token, SgfToken::Label{label: "foo".to_string(), coordinate: (10, 10)});
+        assert_eq!(
+            token,
+            SgfToken::Label {
+                label: "foo".to_string(),
+                coordinate: (10, 10)
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "LB[kk:foo]");
     }
@@ -185,18 +218,24 @@ mod token_tests {
     #[test]
     fn can_parse_add_tokens() {
         let token = SgfToken::from_pair("AB", "aa");
-        assert_eq!(token, SgfToken::Add{
-            color: Color::Black,
-            coordinate: (1, 1),
-        });
+        assert_eq!(
+            token,
+            SgfToken::Add {
+                color: Color::Black,
+                coordinate: (1, 1),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "AB[aa]");
 
         let token = SgfToken::from_pair("AW", "kk");
-        assert_eq!(token, SgfToken::Add{
-            color: Color::White,
-            coordinate: (10, 10),
-        });
+        assert_eq!(
+            token,
+            SgfToken::Add {
+                color: Color::White,
+                coordinate: (10, 10),
+            }
+        );
         let string_token: String = token.into();
         assert_eq!(string_token, "AW[kk]");
     }

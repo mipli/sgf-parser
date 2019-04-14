@@ -197,13 +197,9 @@ mod parser_tests {
         assert_eq!(
             sgf,
             GameTree {
-                nodes: vec![
-                    GameNode {
-                        tokens: vec![
-                            SgfToken::Comment("a [wrapped\\] comment".to_string()),
-                        ],
-                    },
-                ],
+                nodes: vec![GameNode {
+                    tokens: vec![SgfToken::Comment("a [wrapped\\] comment".to_string()),],
+                },],
                 variations: vec![]
             }
         );

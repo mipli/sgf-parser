@@ -1,4 +1,4 @@
-use crate::{SgfError, SgfErrorKind, SgfToken, GameNode};
+use crate::{GameNode, SgfError, SgfErrorKind, SgfToken};
 
 /// A game tree, containing it's nodes and possible variations following the last node
 #[derive(Debug, PartialEq)]
@@ -157,17 +157,15 @@ impl GameTree {
 
 impl Into<String> for &GameTree {
     fn into(self) -> String {
-        let nodes = self.nodes
+        let nodes = self
+            .nodes
             .iter()
-            .map(|n| -> String {
-                n.into()
-            })
+            .map(|n| -> String { n.into() })
             .collect::<String>();
-        let variations = self.variations
+        let variations = self
+            .variations
             .iter()
-            .map(|n| -> String {
-                n.into()
-            })
+            .map(|n| -> String { n.into() })
             .collect::<String>();
         format!("({}{})", nodes, variations)
     }

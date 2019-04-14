@@ -28,13 +28,13 @@
 #![deny(rust_2018_idioms)]
 
 mod error;
-mod token;
-mod parser;
 mod node;
+mod parser;
+mod token;
 mod tree;
 
 pub use crate::error::{SgfError, SgfErrorKind};
-pub use crate::tree::{GameTree};
-pub use crate::token::{Color, SgfToken};
-pub use crate::node::{GameNode};
+pub use crate::node::GameNode;
 pub use crate::parser::parse;
+pub use crate::token::{Color, SgfToken};
+pub use crate::tree::GameTree;

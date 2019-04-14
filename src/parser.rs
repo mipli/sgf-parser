@@ -92,18 +92,11 @@ enum ParserNode<'a> {
 
 fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
     match pair.as_rule() {
-        Rule::game_tree => {
-            ParserNode::GameTree(pair.into_inner().map(parse_pair).collect())
-        }
-        Rule::sequence => {
-            ParserNode::Sequence(pair.into_inner().map(parse_pair).collect())
-        }
+        Rule::game_tree => ParserNode::GameTree(pair.into_inner().map(parse_pair).collect()),
+        Rule::sequence => ParserNode::Sequence(pair.into_inner().map(parse_pair).collect()),
         Rule::node => ParserNode::Node(pair.into_inner().map(parse_pair).collect()),
         Rule::property => {
-            let text_nodes = pair
-                .into_inner()
-                .map(parse_pair)
-                .collect::<Vec<_>>();
+            let text_nodes = pair.into_inner().map(parse_pair).collect::<Vec<_>>();
             let (ident, value) = match &text_nodes[..] {
                 [ParserNode::Text(i), ParserNode::Text(v)] => (i, v),
                 _ => {
@@ -117,12 +110,12 @@ fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
             let value = pair.as_str();
             let end = value.len() - 1;
             ParserNode::Text(&value[1..end])
-        },
+        }
         Rule::inner => {
             unreachable!();
-        },
+        }
         Rule::char => {
             unreachable!();
-        },
+        }
     }
 }
