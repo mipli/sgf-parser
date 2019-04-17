@@ -1,3 +1,4 @@
+use std::ops::Not;
 use crate::{SgfError, SgfErrorKind};
 
 /// Indicates what color the token is related to
@@ -5,6 +6,16 @@ use crate::{SgfError, SgfErrorKind};
 pub enum Color {
     Black,
     White,
+}
+
+impl Not for Color {
+    type Output = Color;
+    fn not(self) -> Color {
+        match self {
+            Color::Black => Color::White,
+            Color::White => Color::Black
+        }
+    }
 }
 
 /// Enum describing all possible SGF Properties
