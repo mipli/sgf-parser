@@ -1,5 +1,5 @@
-use std::ops::Not;
 use crate::{SgfError, SgfErrorKind};
+use std::ops::Not;
 
 /// Indicates what color the token is related to
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -13,7 +13,7 @@ impl Not for Color {
     fn not(self) -> Color {
         match self {
             Color::Black => Color::White,
-            Color::White => Color::Black
+            Color::White => Color::Black,
         }
     }
 }
@@ -129,15 +129,15 @@ impl SgfToken {
                 color: Color::White,
                 rank: value.to_string(),
             }),
-            "KM" => value.parse().ok().map(|komi| SgfToken::Komi(komi)),
+            "KM" => value.parse().ok().map(SgfToken::Komi),
             "SZ" => {
                 if let Some((width, height)) = split_size_text(value) {
                     Some(SgfToken::Size(width, height))
                 } else {
                     value.parse().ok().map(|size| SgfToken::Size(size, size))
                 }
-            },
-            "TM" => value.parse().ok().map(|time| SgfToken::TimeLimit(time)),
+            }
+            "TM" => value.parse().ok().map(SgfToken::TimeLimit),
             "EV" => Some(SgfToken::Event(value.to_string())),
             "C" => Some(SgfToken::Comment(value.to_string())),
             "GN" => Some(SgfToken::GameName(value.to_string())),
@@ -155,7 +155,7 @@ impl SgfToken {
         }
     }
 
-    /// Checks if the token is a root token as defined by the SGF spec. 
+    /// Checks if the token is a root token as defined by the SGF spec.
     ///
     /// Root tokens can only occur in the root of a gametree collection, and they are invalid
     /// anywhere else
@@ -172,8 +172,8 @@ impl SgfToken {
     pub fn is_root_token(&self) -> bool {
         use SgfToken::*;
         match self {
-            Size(_, _ ) => true,
-            _ => false
+            Size(_, _) => true,
+            _ => false,
         }
     }
 }

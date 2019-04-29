@@ -57,11 +57,7 @@ fn create_game_tree(parser_node: ParserNode<'_>, is_root: bool) -> Result<GameTr
         if is_root {
             iter.next();
         }
-        let in_valid = iter.any(|node| {
-             node.tokens.iter().any(|token| {
-                token.is_root_token()
-            })
-        });
+        let in_valid = iter.any(|node| node.tokens.iter().any(|token| token.is_root_token()));
         if in_valid {
             Err(SgfErrorKind::InvalidRootTokenPlacement.into())
         } else {

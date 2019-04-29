@@ -7,7 +7,7 @@ mod parser_tests {
         let sgf = parse("(;KM[6.5];SZ[19])");
         match sgf {
             Err(ref e) => assert_eq!(e.kind, SgfErrorKind::InvalidRootTokenPlacement),
-            _ => assert!(false)
+            _ => assert!(false),
         }
     }
 
