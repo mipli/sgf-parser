@@ -4,6 +4,7 @@
 //!
 //! Using `pest` for the actual parsing part.
 //!
+//!
 //! # Example usage
 //! ```rust
 //! use sgf_parser::*;

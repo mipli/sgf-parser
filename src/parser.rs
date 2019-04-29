@@ -28,7 +28,7 @@ pub fn parse(input: &str) -> Result<GameTree, SgfError> {
         SGFParser::parse(Rule::game_tree, input).map_err(SgfError::parse_error)?;
     if let Some(game_tree) = parse_roots.next() {
         let tree = parse_pair(game_tree);
-        let game = create_game_tree(tree)?;
+        let game = create_game_tree(tree, true)?;
         Ok(game)
     } else {
         Ok(GameTree::default())
@@ -36,7 +36,7 @@ pub fn parse(input: &str) -> Result<GameTree, SgfError> {
 }
 
 /// Creates a `GameTree` from the Pest result
-fn create_game_tree(parser_node: ParserNode<'_>) -> Result<GameTree, SgfError> {
+fn create_game_tree(parser_node: ParserNode<'_>, is_root: bool) -> Result<GameTree, SgfError> {
     if let ParserNode::GameTree(tree_nodes) = parser_node {
         let mut nodes: Vec<GameNode> = vec![];
         let mut variations: Vec<GameTree> = vec![];
@@ -46,14 +46,27 @@ fn create_game_tree(parser_node: ParserNode<'_>) -> Result<GameTree, SgfError> {
                     nodes.extend(parse_sequence(sequence_nodes)?)
                 }
                 ParserNode::GameTree(_) => {
-                    variations.push(create_game_tree(node)?);
+                    variations.push(create_game_tree(node, false)?);
                 }
                 _ => {
                     return Err(SgfErrorKind::ParseError.into());
                 }
             }
         }
-        Ok(GameTree { nodes, variations })
+        let mut iter = nodes.iter();
+        if is_root {
+            iter.next();
+        }
+        let in_valid = iter.any(|node| {
+             node.tokens.iter().any(|token| {
+                token.is_root_token()
+            })
+        });
+        if in_valid {
+            Err(SgfErrorKind::InvalidRootTokenPlacement.into())
+        } else {
+            Ok(GameTree { nodes, variations })
+        }
     } else {
         Err(SgfErrorKind::ParseError.into())
     }

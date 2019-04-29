@@ -3,6 +3,15 @@ mod parser_tests {
     use sgf_parser::*;
 
     #[test]
+    fn errors_on_invalid_root_token_placement() {
+        let sgf = parse("(;KM[6.5];SZ[19])");
+        match sgf {
+            Err(ref e) => assert_eq!(e.kind, SgfErrorKind::InvalidRootTokenPlacement),
+            _ => assert!(false)
+        }
+    }
+
+    #[test]
     fn can_parse_komi() {
         let sgf = parse("(;KM[6.5])");
         assert!(sgf.is_ok());

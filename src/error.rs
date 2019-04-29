@@ -17,6 +17,8 @@ pub enum SgfErrorKind {
     ParseError,
     #[display(fmt = "Variation not found")]
     VariationNotFound,
+    #[display(fmt = "Root token found in a non root node")]
+    InvalidRootTokenPlacement,
 }
 
 impl Error for SgfError {
@@ -44,6 +46,13 @@ impl SgfError {
     pub fn variation_not_found(err: impl Error + Send + Sync + 'static) -> Self {
         SgfError {
             kind: SgfErrorKind::VariationNotFound,
+            source: Some(Box::new(err)),
+        }
+    }
+
+    pub fn invalid_root_token_placment(err: impl Error + Send + Sync + 'static) -> Self {
+        SgfError {
+            kind: SgfErrorKind::InvalidRootTokenPlacement,
             source: Some(Box::new(err)),
         }
     }
