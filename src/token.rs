@@ -32,7 +32,7 @@ pub enum SgfToken {
     GameName(String),
     Place(String),
     Date(String),
-    Size(u32),
+    Size(u32, u32),
     TimeLimit(u32),
     Comment(String),
     Unknown((String, String)),
@@ -130,7 +130,13 @@ impl SgfToken {
                 rank: value.to_string(),
             }),
             "KM" => value.parse().ok().map(|komi| SgfToken::Komi(komi)),
-            "SZ" => value.parse().ok().map(|size| SgfToken::Size(size)),
+            "SZ" => {
+                if let Some((width, height)) = split_size_text(value) {
+                    Some(SgfToken::Size(width, height))
+                } else {
+                    value.parse().ok().map(|size| SgfToken::Size(size, size))
+                }
+            },
             "TM" => value.parse().ok().map(|time| SgfToken::TimeLimit(time)),
             "EV" => Some(SgfToken::Event(value.to_string())),
             "C" => Some(SgfToken::Comment(value.to_string())),
@@ -146,6 +152,28 @@ impl SgfToken {
         match token {
             Some(token) => token,
             _ => SgfToken::Invalid((base_ident.to_string(), value.to_string())),
+        }
+    }
+
+    /// Checks if the token is a root token as defined by the SGF spec. 
+    ///
+    /// Root tokens can only occur in the root of a gametree collection, and they are invalid
+    /// anywhere else
+    ///
+    /// ```
+    /// use sgf_parser::*;
+    ///
+    /// let token = SgfToken::from_pair("B", "aa");
+    /// assert!(!token.is_root_token());
+    ///
+    /// let token = SgfToken::from_pair("SZ", "19");
+    /// assert!(token.is_root_token());
+    /// ```
+    pub fn is_root_token(&self) -> bool {
+        use SgfToken::*;
+        match self {
+            Size(_, _ ) => true,
+            _ => false
         }
     }
 }
@@ -203,7 +231,8 @@ impl Into<String> for &SgfToken {
                 format!("{}[{}]", token, rank)
             }
             SgfToken::Komi(komi) => format!("KM[{}]", komi),
-            SgfToken::Size(size) => format!("SZ[{}]", size),
+            SgfToken::Size(width, height) if width == height => format!("SZ[{}]", width),
+            SgfToken::Size(width, height) => format!("SZ[{}:{}]", width, height),
             SgfToken::TimeLimit(time) => format!("TM[{}]", time),
             SgfToken::Event(value) => format!("EV[{}]", value),
             SgfToken::Comment(value) => format!("C[{}]", value),
@@ -220,6 +249,15 @@ impl Into<String> for SgfToken {
     fn into(self) -> String {
         (&self).into()
     }
+}
+
+/// Splits size input text (NN:MM) to corresponding width and height
+fn split_size_text(input: &str) -> Option<(u32, u32)> {
+    let index = input.find(':')?;
+    let (width_part, height_part) = input.split_at(index);
+    let width: u32 = width_part.parse().ok()?;
+    let height: u32 = height_part[1..].parse().ok()?;
+    Some((width, height))
 }
 
 /// Converts goban coordinates to string representation

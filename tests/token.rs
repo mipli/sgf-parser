@@ -113,9 +113,17 @@ mod token_tests {
     #[test]
     fn can_parse_size_tokens() {
         let token = SgfToken::from_pair("SZ", "19");
-        assert_eq!(token, SgfToken::Size(19));
+        assert_eq!(token, SgfToken::Size(19, 19));
         let string_token: String = token.into();
         assert_eq!(string_token, "SZ[19]");
+    }
+
+    #[test]
+    fn can_parse_size_token_with_two_values() {
+        let token = SgfToken::from_pair("SZ", "15:17");
+        assert_eq!(token, SgfToken::Size(15, 17));
+        let string_token: String = token.into();
+        assert_eq!(string_token, "SZ[15:17]");
     }
 
     #[test]
