@@ -23,7 +23,7 @@ impl GameNode {
         self.tokens
             .iter()
             .filter(|token| match token {
-                SgfToken::Unknown(_) => true,
+                SgfToken::Invalid(_) => true,
                 _ => false,
             })
             .collect()
