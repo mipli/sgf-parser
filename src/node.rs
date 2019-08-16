@@ -15,7 +15,7 @@ impl GameNode {
                 SgfToken::Unknown(_) => true,
                 _ => false,
             })
-            .collect::<Vec<_>>()
+            .collect()
     }
 
     /// Gets a vector of all `SgfToken::Invalid` tokens
@@ -23,10 +23,10 @@ impl GameNode {
         self.tokens
             .iter()
             .filter(|token| match token {
-                SgfToken::Invalid(_) => true,
+                SgfToken::Unknown(_) => true,
                 _ => false,
             })
-            .collect::<Vec<_>>()
+            .collect()
     }
 }
 

@@ -126,5 +126,8 @@ fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
         Rule::char => {
             unreachable!();
         }
+        Rule::WHITESPACE => {
+            unreachable!();
+        }
     }
 }

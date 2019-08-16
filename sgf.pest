@@ -1,3 +1,5 @@
+WHITESPACE = _{ " " | NEWLINE}
+
 game_tree = { "(" ~ sequence? ~ game_tree* ~ ")"}
 sequence = { node{1,} }
 node = { ";" ~ property+ }
@@ -9,3 +11,4 @@ char = {
     "\\" ~ "]"
     | !("]") ~ ANY
 }
+
