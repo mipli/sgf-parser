@@ -3,7 +3,6 @@ use crate::{GameNode, SgfError, SgfErrorKind, SgfToken};
 /// A game tree, containing it's nodes and possible variations following the last node
 #[derive(Debug, PartialEq)]
 pub struct GameTree {
-    /// Game information
     pub nodes: Vec<GameNode>,
     pub variations: Vec<GameTree>,
 }
