@@ -281,28 +281,23 @@ fn split_label_text(input: &str) -> Option<(&str, &str)> {
 }
 
 /// Converts a string describing goban coordinates to numeric coordinates
-/// skips 'I' as a valid coordinate
 fn str_to_coordinates(input: &str) -> Result<(u8, u8), SgfError> {
     if input.len() != 2 {
-        return Err(SgfErrorKind::ParseError.into());
+        Err(SgfErrorKind::ParseError.into())
+    } else {
+        let coords = input
+            .to_lowercase()
+            .as_bytes()
+            .iter()
+            .map(|c| convert_u8_to_coordinate(*c))
+            .collect::<Vec<_>>();
+        Ok((coords[0], coords[1]))
     }
-    let coords = input
-        .to_lowercase()
-        .as_bytes()
-        .iter()
-        .map(|&c| convert_u8_to_coordinate(c))
-        .take(2)
-        .collect::<Vec<_>>();
-    Ok((coords[0], coords[1]))
 }
 
 /// Converts a u8 char to numeric coordinates
+///
+#[inline]
 fn convert_u8_to_coordinate(c: u8) -> u8 {
-    let n = c - 96;
-    // skips 'I' as a valid coordinate
-    if n >= 9 {
-        n - 1
-    } else {
-        n
-    }
+    c - 96
 }
