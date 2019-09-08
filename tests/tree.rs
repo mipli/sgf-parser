@@ -21,20 +21,20 @@ mod tree_tests {
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::Black,
-                        coordinate: (3, 3),
+                        coordinate_or_pass: Some((3, 3)),
                     }],
                 },
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::White,
-                        coordinate: (16, 16),
+                        coordinate_or_pass: Some((16, 16)),
                     }],
                 },
             ],
             variations: vec![],
         };
         let string_tree: String = tree.into();
-        assert_eq!(string_tree, "(;PB[black]PW[white];B[cc];W[qq])");
+        assert_eq!(string_tree, "(;PB[black]PW[white];B[cc];W[pp])");
     }
 
     #[test]
@@ -56,13 +56,13 @@ mod tree_tests {
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::Black,
-                        coordinate: (3, 3),
+                        coordinate_or_pass: Some((3, 3)),
                     }],
                 },
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::White,
-                        coordinate: (16, 16),
+                        coordinate_or_pass: Some((16, 16)),
                     }],
                 },
             ],
@@ -71,7 +71,7 @@ mod tree_tests {
                     nodes: vec![GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::Black,
-                            coordinate: (4, 16),
+                            coordinate_or_pass: Some((4, 16)),
                         }],
                     }],
                     variations: vec![],
@@ -80,7 +80,7 @@ mod tree_tests {
                     nodes: vec![GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::Black,
-                            coordinate: (16, 4),
+                            coordinate_or_pass: Some((16, 4)),
                         }],
                     }],
                     variations: vec![],
@@ -90,7 +90,7 @@ mod tree_tests {
         let string_tree: String = tree.into();
         assert_eq!(
             string_tree,
-            "(;PB[black]PW[white];B[cc];W[qq](;B[dq])(;B[qd]))"
+            "(;PB[black]PW[white];B[cc];W[pp](;B[dp])(;B[pd]))"
         );
     }
 }

@@ -22,7 +22,7 @@ impl Not for Color {
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
     Add { color: Color, coordinate: (u8, u8) },
-    Move { color: Color, coordinate: (u8, u8) },
+    Move { color: Color, coordinate_or_pass: Option<(u8, u8)> },
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
@@ -53,7 +53,10 @@ impl SgfToken {
     /// use sgf_parser::*;
     ///
     /// let token = SgfToken::from_pair("B", "aa");
-    /// assert_eq!(token, SgfToken::Move { color: Color::Black, coordinate: (1, 1) });
+    /// assert_eq!(token, SgfToken::Move { color: Color::Black, coordinate_or_pass: Some((1, 1)) });
+    ///
+    /// let token = SgfToken::from_pair("B", "");
+    /// assert_eq!(token, SgfToken::Move { color: Color::Black, coordinate_or_pass: None });
     ///
     /// let token = SgfToken::from_pair("B", "not_coord");
     /// assert_eq!(token, SgfToken::Invalid(("B".to_string(), "not_coord".to_string())));
@@ -87,11 +90,11 @@ impl SgfToken {
                     color: Color::Black,
                     coordinate,
                 }),
-            "B" => str_to_coordinates(value)
+            "B" => move_str_to_coord(value)
                 .ok()
                 .map(|coordinate| SgfToken::Move {
                     color: Color::Black,
-                    coordinate,
+                    coordinate_or_pass: coordinate,
                 }),
             "BL" => value.parse().ok().map(|time| SgfToken::Time {
                 color: Color::Black,
@@ -111,11 +114,11 @@ impl SgfToken {
                     color: Color::White,
                     coordinate,
                 }),
-            "W" => str_to_coordinates(value)
+            "W" => move_str_to_coord(value)
                 .ok()
                 .map(|coordinate| SgfToken::Move {
                     color: Color::White,
-                    coordinate,
+                    coordinate_or_pass: coordinate,
                 }),
             "WL" => value.parse().ok().map(|time| SgfToken::Time {
                 color: Color::White,
@@ -182,15 +185,15 @@ impl Into<String> for &SgfToken {
     fn into(self) -> String {
         match self {
             SgfToken::Label { label, coordinate } => {
-                let value = coordinate_to_str(*coordinate);
+                let value = coordinate_to_str(Some(*coordinate));
                 format!("LB[{}:{}]", value, label)
             }
             SgfToken::Square { coordinate } => {
-                let value = coordinate_to_str(*coordinate);
+                let value = coordinate_to_str(Some(*coordinate));
                 format!("SQ[{}]", value)
             }
             SgfToken::Triangle { coordinate } => {
-                let value = coordinate_to_str(*coordinate);
+                let value = coordinate_to_str(Some(*coordinate));
                 format!("TR[{}]", value)
             }
             SgfToken::Add { color, coordinate } => {
@@ -198,15 +201,15 @@ impl Into<String> for &SgfToken {
                     Color::Black => "AB",
                     Color::White => "AW",
                 };
-                let value = coordinate_to_str(*coordinate);
+                let value = coordinate_to_str(Some(*coordinate));
                 format!("{}[{}]", token, value)
             }
-            SgfToken::Move { color, coordinate } => {
+            SgfToken::Move { color, coordinate_or_pass } => {
                 let token = match color {
                     Color::Black => "B",
                     Color::White => "W",
                 };
-                let value = coordinate_to_str(*coordinate);
+                let value = coordinate_to_str(*coordinate_or_pass);
                 format!("{}[{}]", token, value)
             }
             SgfToken::Time { color, time } => {
@@ -260,15 +263,21 @@ fn split_size_text(input: &str) -> Option<(u32, u32)> {
     Some((width, height))
 }
 
+
 /// Converts goban coordinates to string representation
-fn coordinate_to_str(coordinate: (u8, u8)) -> String {
-    let conv = |n| {
-        // skips 'I' as a valid coordinate
-        n + if n >= 9 { 97 } else { 96 }
-    };
-    let x = conv(coordinate.0) as char;
-    let y = conv(coordinate.1) as char;
-    [x, y].iter().collect()
+/// Pass None to simulate a pass
+fn coordinate_to_str(coordinate: Option<(u8, u8)>) -> String {
+    if let Some(coord) = coordinate {
+        /* let conv = |n| {
+            // skips 'I' as a valid coordinate
+            n + if n >= 9 { 97 } else { 96 }
+        }; */
+        let x = (coord.0+ 96) as char;
+        let y = (coord.1 + 96) as char;
+        [x, y].iter().collect()
+    } else {
+        String::new() // Empty string for and pass
+    }
 }
 
 /// If possible, splits a label text into coordinate and label pair
@@ -277,6 +286,17 @@ fn split_label_text(input: &str) -> Option<(&str, &str)> {
         Some(input.split_at(2))
     } else {
         None
+    }
+}
+
+fn move_str_to_coord(input: &str) -> Result<Option<(u8, u8)>, SgfError> {
+    if input.is_empty() {
+        Ok(None)
+    } else {
+        match str_to_coordinates(input) {
+            Ok(t) => Ok(Some(t)),
+            Err(e) => Err(e)
+        }
     }
 }
 

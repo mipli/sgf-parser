@@ -9,7 +9,7 @@ mod token_tests {
             token,
             SgfToken::Move {
                 color: Color::Black,
-                coordinate: (1, 1),
+                coordinate_or_pass: Some((1, 1)),
             }
         );
         let string_token: String = token.into();
@@ -20,7 +20,7 @@ mod token_tests {
             token,
             SgfToken::Move {
                 color: Color::White,
-                coordinate: (10, 10),
+                coordinate_or_pass: Some((11, 11)),
             }
         );
         let string_token: String = token.into();
@@ -216,7 +216,7 @@ mod token_tests {
             token,
             SgfToken::Label {
                 label: "foo".to_string(),
-                coordinate: (10, 10)
+                coordinate: (11, 11)
             }
         );
         let string_token: String = token.into();
@@ -241,7 +241,7 @@ mod token_tests {
             token,
             SgfToken::Add {
                 color: Color::White,
-                coordinate: (10, 10),
+                coordinate: (11, 11),
             }
         );
         let string_token: String = token.into();
