@@ -13,7 +13,7 @@ mod model_tests {
                 tokens: vec![
                     SgfToken::Move {
                         color: Color::White,
-                        coordinate: (5, 6)
+                        coordinate_or_pass: Some((5, 6))
                     },
                     SgfToken::Unknown(("AC".to_string(), "23".to_string()))
                 ]
@@ -56,7 +56,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (4, 3)
+                    coordinate_or_pass: Some((4, 3))
                 }]
             })
         );
@@ -65,7 +65,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::White,
-                    coordinate: (5, 6)
+                    coordinate_or_pass: Some((5, 6))
                 }]
             })
         );
@@ -82,7 +82,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (4, 3)
+                    coordinate_or_pass: Some((4, 3))
                 }]
             })
         );
@@ -91,7 +91,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::White,
-                    coordinate: (5, 6)
+                    coordinate_or_pass: Some((5, 6))
                 }]
             })
         );
@@ -100,7 +100,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (1, 1)
+                    coordinate_or_pass: Some((1, 1))
                 }]
             })
         );
@@ -122,7 +122,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (4, 3)
+                    coordinate_or_pass: Some((4, 3))
                 }]
             })
         );
@@ -131,7 +131,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::White,
-                    coordinate: (5, 6)
+                    coordinate_or_pass: Some((5, 6))
                 }]
             })
         );
@@ -140,7 +140,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (3, 3)
+                    coordinate_or_pass: Some((3, 3))
                 }]
             })
         );
