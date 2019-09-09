@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod parser_tests {
     use sgf_parser::*;
+    use sgf_parser::Action::Move;
 
     #[test]
     fn errors_on_invalid_root_token_placement() {
@@ -22,7 +23,7 @@ mod parser_tests {
                 nodes: vec![GameNode {
                     tokens: vec![SgfToken::Komi(6.5f32)]
                 }],
-                variations: vec![]
+                variations: vec![],
             }
         );
     }
@@ -38,7 +39,7 @@ mod parser_tests {
                 nodes: vec![GameNode {
                     tokens: vec![SgfToken::Copyright("2017".to_string())],
                 }],
-                variations: vec![]
+                variations: vec![],
             }
         );
     }
@@ -55,15 +56,15 @@ mod parser_tests {
                     tokens: vec![
                         SgfToken::Move {
                             color: Color::Black,
-                            coordinate_or_pass: Some((4, 3))
+                            action: Move(4, 3),
                         },
                         SgfToken::Time {
                             color: Color::Black,
-                            time: 3498
+                            time: 3498,
                         }
                     ],
                 }],
-                variations: vec![]
+                variations: vec![],
             }
         );
     }
@@ -80,17 +81,17 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::Black,
-                            coordinate_or_pass: Some((4, 3))
+                            action: Move(4, 3),
                         }],
                     },
                     GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::White,
-                            coordinate_or_pass: Some((5, 6))
+                            action: Move(5, 6),
                         }],
                     }
                 ],
-                variations: vec![]
+                variations: vec![],
             }
         );
     }
@@ -106,29 +107,29 @@ mod parser_tests {
                 nodes: vec![GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::Black,
-                        coordinate_or_pass: Some((1, 1))
+                        action: Move(1, 1),
                     }],
-                },],
+                }, ],
                 variations: vec![
                     GameTree {
                         nodes: vec![GameNode {
                             tokens: vec![SgfToken::Move {
                                 color: Color::White,
-                                coordinate_or_pass: Some((2, 2))
+                                action: Move(2, 2),
                             }],
-                        },],
-                        variations: vec![]
+                        }, ],
+                        variations: vec![],
                     },
                     GameTree {
                         nodes: vec![GameNode {
                             tokens: vec![SgfToken::Move {
                                 color: Color::White,
-                                coordinate_or_pass: Some((3, 3))
+                                action: Move(3, 3),
                             }],
-                        },],
-                        variations: vec![]
+                        }, ],
+                        variations: vec![],
                     }
-                ]
+                ],
             }
         );
     }
@@ -147,11 +148,11 @@ mod parser_tests {
                             SgfToken::Event("event".to_string()),
                             SgfToken::PlayerName {
                                 color: Color::Black,
-                                name: "black".to_string()
+                                name: "black".to_string(),
                             },
                             SgfToken::PlayerName {
                                 color: Color::White,
-                                name: "white".to_string()
+                                name: "white".to_string(),
                             },
                             SgfToken::Comment("comment".to_string()),
                         ],
@@ -159,11 +160,11 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::Black,
-                            coordinate_or_pass: Some((1, 1))
+                            action: Move(1, 1),
                         }],
                     }
                 ],
-                variations: vec![]
+                variations: vec![],
             }
         );
     }
@@ -180,20 +181,20 @@ mod parser_tests {
                     GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::Black,
-                            coordinate_or_pass: Some((4, 3))
+                            action: Move(4, 3),
                         }],
                     },
                     GameNode {
-                        tokens: vec![SgfToken::Unknown(("FO".to_string(), "asdf".to_string())),],
+                        tokens: vec![SgfToken::Unknown(("FO".to_string(), "asdf".to_string())), ],
                     },
                     GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::White,
-                            coordinate_or_pass: Some((5, 6))
+                            action: Move(5, 6),
                         }],
                     }
                 ],
-                variations: vec![]
+                variations: vec![],
             }
         );
     }
@@ -207,9 +208,9 @@ mod parser_tests {
             sgf,
             GameTree {
                 nodes: vec![GameNode {
-                    tokens: vec![SgfToken::Comment("a [wrapped\\] comment".to_string()),],
-                },],
-                variations: vec![]
+                    tokens: vec![SgfToken::Comment("a [wrapped\\] comment".to_string()), ],
+                }, ],
+                variations: vec![],
             }
         );
     }

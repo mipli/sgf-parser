@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tree_tests {
     use sgf_parser::*;
+    use sgf_parser::Action::Move;
 
     #[test]
     fn can_convert_game_tree_without_variations() {
@@ -21,13 +22,13 @@ mod tree_tests {
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::Black,
-                        coordinate_or_pass: Some((3, 3)),
+                        action: Move(3, 3),
                     }],
                 },
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::White,
-                        coordinate_or_pass: Some((16, 16)),
+                        action: Move(16, 16),
                     }],
                 },
             ],
@@ -56,13 +57,13 @@ mod tree_tests {
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::Black,
-                        coordinate_or_pass: Some((3, 3)),
+                        action: Move(3, 3),
                     }],
                 },
                 GameNode {
                     tokens: vec![SgfToken::Move {
                         color: Color::White,
-                        coordinate_or_pass: Some((16, 16)),
+                        action: Move(16, 16),
                     }],
                 },
             ],
@@ -71,7 +72,7 @@ mod tree_tests {
                     nodes: vec![GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::Black,
-                            coordinate_or_pass: Some((4, 16)),
+                            action: Move(4, 16),
                         }],
                     }],
                     variations: vec![],
@@ -80,7 +81,7 @@ mod tree_tests {
                     nodes: vec![GameNode {
                         tokens: vec![SgfToken::Move {
                             color: Color::Black,
-                            coordinate_or_pass: Some((16, 4)),
+                            action: Move(16, 4),
                         }],
                     }],
                     variations: vec![],
