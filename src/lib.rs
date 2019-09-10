@@ -37,5 +37,5 @@ mod tree;
 pub use crate::error::{SgfError, SgfErrorKind};
 pub use crate::node::GameNode;
 pub use crate::parser::parse;
-pub use crate::token::{Color, SgfToken};
+pub use crate::token::{Color, SgfToken, Action};
 pub use crate::tree::GameTree;

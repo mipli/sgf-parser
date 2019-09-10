@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod token_tests {
     use sgf_parser::*;
-
+    use sgf_parser::Action::Move;
     #[test]
     fn can_parse_move_tokens() {
         let token = SgfToken::from_pair("B", "aa");
@@ -9,7 +9,7 @@ mod token_tests {
             token,
             SgfToken::Move {
                 color: Color::Black,
-                coordinate: (1, 1),
+                action: Move(1, 1),
             }
         );
         let string_token: String = token.into();
@@ -20,7 +20,7 @@ mod token_tests {
             token,
             SgfToken::Move {
                 color: Color::White,
-                coordinate: (10, 10),
+                action: Move(11, 11),
             }
         );
         let string_token: String = token.into();
@@ -216,7 +216,7 @@ mod token_tests {
             token,
             SgfToken::Label {
                 label: "foo".to_string(),
-                coordinate: (10, 10)
+                coordinate: (11, 11)
             }
         );
         let string_token: String = token.into();
@@ -241,7 +241,7 @@ mod token_tests {
             token,
             SgfToken::Add {
                 color: Color::White,
-                coordinate: (10, 10),
+                coordinate: (11, 11),
             }
         );
         let string_token: String = token.into();

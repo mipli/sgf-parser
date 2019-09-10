@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod model_tests {
     use sgf_parser::*;
+    use sgf_parser::Action::Move;
 
     #[test]
     fn can_get_unknown_nodes() {
@@ -13,7 +14,7 @@ mod model_tests {
                 tokens: vec![
                     SgfToken::Move {
                         color: Color::White,
-                        coordinate: (5, 6)
+                        action: Move(5, 6),
                     },
                     SgfToken::Unknown(("AC".to_string(), "23".to_string()))
                 ]
@@ -56,7 +57,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (4, 3)
+                    action: Move(4, 3),
                 }]
             })
         );
@@ -65,7 +66,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::White,
-                    coordinate: (5, 6)
+                    action: Move(5, 6),
                 }]
             })
         );
@@ -82,7 +83,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (4, 3)
+                    action: Move(4, 3),
                 }]
             })
         );
@@ -91,7 +92,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::White,
-                    coordinate: (5, 6)
+                    action: Move(5, 6),
                 }]
             })
         );
@@ -100,7 +101,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (1, 1)
+                    action: Move(1, 1),
                 }]
             })
         );
@@ -122,7 +123,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (4, 3)
+                    action: Move(4, 3),
                 }]
             })
         );
@@ -131,7 +132,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::White,
-                    coordinate: (5, 6)
+                    action: Move(5, 6),
                 }]
             })
         );
@@ -140,7 +141,7 @@ mod model_tests {
             Some(&GameNode {
                 tokens: vec![SgfToken::Move {
                     color: Color::Black,
-                    coordinate: (3, 3)
+                    action: Move(3, 3),
                 }]
             })
         );
