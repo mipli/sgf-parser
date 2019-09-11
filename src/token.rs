@@ -313,7 +313,8 @@ fn split_size_text(input: &str) -> Option<(u32, u32)> {
 fn coordinate_to_str(coordinate: (u8, u8)) -> String {
     let x = (coordinate.0 + 96) as char;
     let y = (coordinate.1 + 96) as char;
-    [x, y].iter().collect()
+
+    format!("{}{}",x,y)
 }
 
 /// If possible, splits a label text into coordinate and label pair
