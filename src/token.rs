@@ -1,9 +1,11 @@
 use crate::{SgfError, SgfErrorKind};
 use std::ops::Not;
 use crate::token::Action::{Pass, Move};
+use crate::token::Color::{Black, White};
+use crate::token::Outcome::{WinnerByPoints, WinnerByResign};
 
 /// Indicates what color the token is related to
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum Color {
     Black,
     White,
@@ -17,6 +19,13 @@ impl Not for Color {
             Color::White => Color::Black,
         }
     }
+}
+
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum Outcome {
+    WinnerByResign(Color),
+    WinnerByPoints(Color, f32),
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -33,6 +42,7 @@ pub enum SgfToken {
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
+    Result(Outcome),
     Komi(f32),
     Event(String),
     Copyright(String),
@@ -139,6 +149,10 @@ impl SgfToken {
                 color: Color::White,
                 rank: value.to_string(),
             }),
+            "RE" => Some(SgfToken::Result(
+                parse_outcome_str(value)
+                    .expect(&format!("Error parsing RE token with this value {}", value))
+            )),
             "KM" => value.parse().ok().map(SgfToken::Komi),
             "SZ" => {
                 if let Some((width, height)) = split_size_text(value) {
@@ -195,6 +209,27 @@ impl Into<String> for &SgfToken {
                 let value = coordinate_to_str(*coordinate);
                 format!("LB[{}:{}]", value, label)
             }
+            SgfToken::Result(outcome) => {
+                match outcome {
+                    WinnerByPoints(color, points) => {
+                        format!("RE[{}+{}]",
+                                match color {
+                                    Black => "B",
+                                    White => "W"
+                                },
+                                points
+                        )
+                    }
+                    WinnerByResign(color) => {
+                        format!("RE[{}+R]",
+                                match color {
+                                    Black => "B",
+                                    White => "W"
+                                }
+                        )
+                    }
+                }
+            }
             SgfToken::Square { coordinate } => {
                 let value = coordinate_to_str(*coordinate);
                 format!("SQ[{}]", value)
@@ -217,7 +252,7 @@ impl Into<String> for &SgfToken {
                     Color::White => "W",
                 };
                 let value = match *action {
-                    Move(x,y) => coordinate_to_str((x,y)),
+                    Move(x, y) => coordinate_to_str((x, y)),
                     Pass => String::new()
                 };
                 format!("{}[{}]", token, value)
@@ -288,6 +323,37 @@ fn split_label_text(input: &str) -> Option<(&str, &str)> {
     } else {
         None
     }
+}
+
+/// assert_eq!(sgf_parser::parse_outcome_str("B+R"), Outcome::WinnerByResign(Color::Black));
+/// assert_eq!(sgf_parser::parse_outcome_str("B+35.0"), Outcome::WinnerByPoints(Color::Black, 35.0));
+/// assert_eq!(sgf_parser::parse_outcome_str("W+R"), Outcome::WinnerByResign(Color::White));
+/// assert_eq!(sgf_parser::parse_outcome_str("W+66.5"), Outcome::WinnerByPoints(Color::Black, 65
+/// .5));
+///
+fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
+    if s.is_empty() {
+        return Err(SgfError::from(SgfErrorKind::ParseError));
+    }
+    let winner_option: Vec<&str> = s.split("+").collect();
+    if winner_option.len() != 2 {
+        return Err(SgfError::from(SgfErrorKind::ParseError));
+    }
+    assert_eq!(winner_option.len(), 2);
+    let winner = if winner_option[0].starts_with("B") {
+        Black
+    } else {
+        White
+    };
+
+    let outcome = if winner_option[1].starts_with("R") {
+        WinnerByResign(winner)
+    } else {
+        WinnerByPoints(winner,
+                       winner_option[1].parse::<f32>().expect("Parse the result score"),
+        )
+    };
+    Ok(outcome)
 }
 
 fn move_str_to_coord(input: &str) -> Result<Action, SgfError> {

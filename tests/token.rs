@@ -2,6 +2,7 @@
 mod token_tests {
     use sgf_parser::*;
     use sgf_parser::Action::Move;
+
     #[test]
     fn can_parse_move_tokens() {
         let token = SgfToken::from_pair("B", "aa");
@@ -25,6 +26,30 @@ mod token_tests {
         );
         let string_token: String = token.into();
         assert_eq!(string_token, "W[kk]");
+    }
+
+    #[test]
+    fn can_parse_result_tokens() {
+        assert_eq!(
+            SgfToken::from_pair("RE", "B+R"),
+            SgfToken::Result(Outcome::WinnerByResign(Color::Black))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RE", "B+Resign"),
+            SgfToken::Result(Outcome::WinnerByResign(Color::Black))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RE", "B+35.0"),
+            SgfToken::Result(Outcome::WinnerByPoints(Color::Black, 35.0))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RE", "W+R"),
+            SgfToken::Result(Outcome::WinnerByResign(Color::White))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RE", "W+55.5"),
+            SgfToken::Result(Outcome::WinnerByPoints(Color::White, 55.5))
+        );
     }
 
     #[test]
@@ -216,7 +241,7 @@ mod token_tests {
             token,
             SgfToken::Label {
                 label: "foo".to_string(),
-                coordinate: (11, 11)
+                coordinate: (11, 11),
             }
         );
         let string_token: String = token.into();
