@@ -32,10 +32,24 @@ impl GameNode {
 
 impl Into<String> for &GameNode {
     fn into(self) -> String {
-        self.tokens.iter().fold(";".to_string(), |out, token| {
-            let s: String = token.into();
-            format!("{}{}", out, s)
-        })
+        let mut token_strings: Vec<String> = self.tokens.iter().map(|t| t.into()).collect();
+        token_strings.sort();
+        let (_, out) = token_strings
+            .iter()
+            .fold((None, vec![";"]), |(prev, mut out), token| {
+                let offset = token.find('[').unwrap_or_else(|| token.len());
+                match prev {
+                    Some(ref prop) if token.starts_with(prop) => {
+                        out.push(&token[offset..]);
+                        (prev, out)
+                    },
+                    _ => {
+                        out.push(&token);
+                        (Some(&token[0..offset]), out)
+                    },
+                }
+            });
+        out.join("")
     }
 }
 
