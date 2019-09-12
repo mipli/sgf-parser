@@ -1,8 +1,8 @@
+use crate::token::Action::{Move, Pass};
+use crate::token::Color::{Black, White};
+use crate::token::Outcome::{Draw, WinnerByForfeit, WinnerByPoints, WinnerByResign, WinnerByTime};
 use crate::{SgfError, SgfErrorKind};
 use std::ops::Not;
-use crate::token::Action::{Pass, Move};
-use crate::token::Color::{Black, White};
-use crate::token::Outcome::{WinnerByPoints, WinnerByResign, WinnerByTime, Draw, WinnerByForfeit};
 
 /// Indicates what color the token is related to
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -21,7 +21,6 @@ impl Not for Color {
     }
 }
 
-
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Outcome {
     WinnerByResign(Color),
@@ -34,12 +33,11 @@ pub enum Outcome {
 impl Outcome {
     pub fn get_winner(self) -> Option<Color> {
         match self {
-            WinnerByTime(color) |
-            WinnerByForfeit(color) |
-            WinnerByPoints(color, ..) |
-            WinnerByResign(color)
-            => Some(color),
-            _ => None
+            WinnerByTime(color)
+            | WinnerByForfeit(color)
+            | WinnerByPoints(color, ..)
+            | WinnerByResign(color) => Some(color),
+            _ => None,
         }
     }
 }
@@ -112,8 +110,11 @@ impl SgfToken {
                         coordinate,
                     })
             }),
-            "HA" => Some(SgfToken::Handicap(value.parse()
-                .expect(&format!("Error parsing the handicap value : {}", value)))),
+            "HA" => Some(SgfToken::Handicap(
+                value
+                    .parse()
+                    .expect(&format!("Error parsing the handicap value : {}", value)),
+            )),
             "SQ" => str_to_coordinates(value)
                 .ok()
                 .map(|coordinate| SgfToken::Square { coordinate }),
@@ -168,10 +169,7 @@ impl SgfToken {
                 color: Color::White,
                 rank: value.to_string(),
             }),
-            "RE" => parse_outcome_str(value)
-                .ok()
-                .map(|o| SgfToken::Result(o))
-            ,
+            "RE" => parse_outcome_str(value).ok().map(|o| SgfToken::Result(o)),
             "KM" => value.parse().ok().map(SgfToken::Komi),
             "SZ" => {
                 if let Some((width, height)) = split_size_text(value) {
@@ -228,40 +226,40 @@ impl Into<String> for &SgfToken {
                 let value = coordinate_to_str(*coordinate);
                 format!("LB[{}:{}]", value, label)
             }
-            SgfToken::Handicap(nb_stones) =>
-                format!("HA[{}]", nb_stones),
-            SgfToken::Result(outcome) => {
-                match outcome {
-                    WinnerByPoints(color, points) => format!("RE[{}+{}]",
-                                                             match color {
-                                                                 Black => "B",
-                                                                 White => "W"
-                                                             },
-                                                             points
-                    ),
-                    WinnerByResign(color) => format!("RE[{}+R]",
-                                                     match color {
-                                                         Black => "B",
-                                                         White => "W"
-                                                     }
-                    ),
+            SgfToken::Handicap(nb_stones) => format!("HA[{}]", nb_stones),
+            SgfToken::Result(outcome) => match outcome {
+                WinnerByPoints(color, points) => format!(
+                    "RE[{}+{}]",
+                    match color {
+                        Black => "B",
+                        White => "W",
+                    },
+                    points
+                ),
+                WinnerByResign(color) => format!(
+                    "RE[{}+R]",
+                    match color {
+                        Black => "B",
+                        White => "W",
+                    }
+                ),
 
-                    WinnerByTime(color) => format!("RE[{}+T]",
-                                                   match color {
-                                                       Black => "B",
-                                                       White => "W"
-                                                   }
-                    )
-                    ,
-                    WinnerByForfeit(color) => format!("RE[{}+F]",
-                                                      match color {
-                                                          Black => "B",
-                                                          White => "W"
-                                                      }
-                    ),
-                    Draw => "RE[Draw]".to_string()
-                }
-            }
+                WinnerByTime(color) => format!(
+                    "RE[{}+T]",
+                    match color {
+                        Black => "B",
+                        White => "W",
+                    }
+                ),
+                WinnerByForfeit(color) => format!(
+                    "RE[{}+F]",
+                    match color {
+                        Black => "B",
+                        White => "W",
+                    }
+                ),
+                Draw => "RE[Draw]".to_string(),
+            },
             SgfToken::Square { coordinate } => {
                 let value = coordinate_to_str(*coordinate);
                 format!("SQ[{}]", value)
@@ -285,7 +283,7 @@ impl Into<String> for &SgfToken {
                 };
                 let value = match *action {
                     Move(x, y) => coordinate_to_str((x, y)),
-                    Pass => String::new()
+                    Pass => String::new(),
                 };
                 format!("{}[{}]", token, value)
             }
@@ -340,7 +338,6 @@ fn split_size_text(input: &str) -> Option<(u32, u32)> {
     Some((width, height))
 }
 
-
 /// Converts goban coordinates to string representation
 fn coordinate_to_str(coordinate: (u8, u8)) -> String {
     let x = (coordinate.0 + 96) as char;
@@ -388,7 +385,7 @@ fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
     let winner: Color = match &winner_option[0] as &str {
         "B" => Black,
         "W" => White,
-        _ => return Err(SgfError::from(SgfErrorKind::ParseError))
+        _ => return Err(SgfError::from(SgfErrorKind::ParseError)),
     };
 
     let outcome = match &winner_option[1] as &str {
@@ -396,8 +393,10 @@ fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
         "R" | "Resign" => Ok(WinnerByResign(winner)),
         "T" | "Time" => Ok(WinnerByTime(winner)),
         points => {
-            if let Ok(outcome) = points.parse::<f32>().map(|score|
-                WinnerByPoints(winner, score)) {
+            if let Ok(outcome) = points
+                .parse::<f32>()
+                .map(|score| WinnerByPoints(winner, score))
+            {
                 Ok(outcome)
             } else {
                 Err(SgfError::from(SgfErrorKind::ParseError))
@@ -414,7 +413,7 @@ fn move_str_to_coord(input: &str) -> Result<Action, SgfError> {
     } else {
         match str_to_coordinates(input) {
             Ok(coordinates) => Ok(Move(coordinates.0, coordinates.1)),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
     }
 }

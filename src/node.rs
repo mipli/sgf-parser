@@ -42,11 +42,11 @@ impl Into<String> for &GameNode {
                     Some(ref prop) if token.starts_with(prop) => {
                         out.push(&token[offset..]);
                         (prev, out)
-                    },
+                    }
                     _ => {
                         out.push(&token);
                         (Some(&token[0..offset]), out)
-                    },
+                    }
                 }
             });
         out.join("")

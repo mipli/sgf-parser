@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tree_tests {
-    use sgf_parser::*;
     use sgf_parser::Action::Move;
+    use sgf_parser::*;
 
     #[test]
     fn can_convert_game_tree_without_variations() {
