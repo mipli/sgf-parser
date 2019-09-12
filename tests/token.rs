@@ -50,6 +50,18 @@ mod token_tests {
             SgfToken::from_pair("RE", "W+55.5"),
             SgfToken::Result(Outcome::WinnerByPoints(Color::White, 55.5))
         );
+        assert_eq!(
+            SgfToken::from_pair("RE", "W+T"),
+            SgfToken::Result(Outcome::WinnerByTime(Color::White))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RE", "W+Time"),
+            SgfToken::Result(Outcome::WinnerByTime(Color::White))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RE", "Draw"),
+            SgfToken::Result(Outcome::Draw)
+        );
     }
 
     #[test]
