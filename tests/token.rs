@@ -261,6 +261,22 @@ mod token_tests {
     }
 
     #[test]
+    fn can_parse_handicap_token() {
+        assert_eq!(
+            SgfToken::from_pair("HA", "3"),
+            SgfToken::Handicap(3)
+        );
+        assert_eq!(
+            SgfToken::from_pair("HA", "0"),
+            SgfToken::Handicap(0)
+        );
+        assert_eq!(
+            SgfToken::from_pair("HA", "999"),
+            SgfToken::Handicap(999)
+        )
+    }
+
+    #[test]
     fn can_parse_add_tokens() {
         let token = SgfToken::from_pair("AB", "aa");
         assert_eq!(
