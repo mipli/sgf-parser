@@ -214,4 +214,24 @@ mod parser_tests {
             }
         );
     }
+
+    #[test]
+    fn can_parse_multiple_property_values_to_one_identifier() {
+        let sgf = parse("(;AB[aa][ab][cc])");
+        assert!(sgf.is_ok());
+        let sgf = sgf.unwrap();
+        assert_eq!(
+            sgf,
+            GameTree {
+                nodes: vec![GameNode {
+                    tokens: vec![
+                        SgfToken::Add{ color: Color::Black, coordinate: (1, 1)},
+                        SgfToken::Add{ color: Color::Black, coordinate: (1, 2)},
+                        SgfToken::Add{ color: Color::Black, coordinate: (3, 3)},
+                    ],
+                }, ],
+                variations: vec![],
+            }
+        );
+    }
 }

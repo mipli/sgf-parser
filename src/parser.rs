@@ -75,8 +75,8 @@ fn parse_sequence(sequence_nodes: Vec<ParserNode<'_>>) -> Result<Vec<GameNode>, 
         if let ParserNode::Node(node_tokens) = sequence_node {
             let mut tokens: Vec<SgfToken> = vec![];
             for t in node_tokens {
-                if let ParserNode::Token(token) = t {
-                    tokens.push(token.clone());
+                if let ParserNode::Token(new_tokens) = t {
+                    tokens.extend(new_tokens.clone());
                 } else {
                     return Err(SgfErrorKind::ParseError.into());
                 }
@@ -92,7 +92,7 @@ fn parse_sequence(sequence_nodes: Vec<ParserNode<'_>>) -> Result<Vec<GameNode>, 
 /// Intermediate nodes from parsing the SGF file
 #[derive(Debug, PartialEq, Clone)]
 enum ParserNode<'a> {
-    Token(SgfToken),
+    Token(Vec<SgfToken>),
     Text(&'a str),
     Node(Vec<ParserNode<'a>>),
     Sequence(Vec<ParserNode<'a>>),
@@ -106,13 +106,21 @@ fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
         Rule::node => ParserNode::Node(pair.into_inner().map(parse_pair).collect()),
         Rule::property => {
             let text_nodes = pair.into_inner().map(parse_pair).collect::<Vec<_>>();
-            let (ident, value) = match &text_nodes[..] {
-                [ParserNode::Text(i), ParserNode::Text(v)] => (i, v),
-                _ => {
-                    panic!("Property node should only contain two text nodes");
+            let (_, ts) = text_nodes.iter().try_fold((None, vec![]), |(ident, mut tokens), value| {
+                if let ParserNode::Text(value) = value {
+                    match ident {
+                        None => Some((Some(*value), tokens)),
+                        Some(id) => {
+                            tokens.push(SgfToken::from_pair(id, value));
+                            Some((ident, tokens))
+                        }
+                    }
+                } else {
+                    None
                 }
-            };
-            ParserNode::Token(SgfToken::from_pair(ident, value))
+
+            }).expect("Pest parsing guarantee that all properties have an identifier and a value");
+            ParserNode::Token(ts)
         }
         Rule::property_identifier => ParserNode::Text(pair.as_str()),
         Rule::property_value => {
