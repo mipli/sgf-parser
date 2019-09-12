@@ -51,6 +51,7 @@ pub enum SgfToken {
     Date(String),
     Size(u32, u32),
     TimeLimit(u32),
+    Handicap(u32),
     Comment(String),
     Unknown((String, String)),
     Invalid((String, String)),
@@ -95,6 +96,8 @@ impl SgfToken {
                         coordinate,
                     })
             }),
+            "HA" => Some(SgfToken::Handicap(value.parse()
+                .expect(&format!("Error parsing the handicap value : {}", value)))),
             "SQ" => str_to_coordinates(value)
                 .ok()
                 .map(|coordinate| SgfToken::Square { coordinate }),
@@ -209,6 +212,8 @@ impl Into<String> for &SgfToken {
                 let value = coordinate_to_str(*coordinate);
                 format!("LB[{}:{}]", value, label)
             }
+            SgfToken::Handicap(nb_stones) =>
+                format!("HA[{}]", nb_stones),
             SgfToken::Result(outcome) => {
                 match outcome {
                     WinnerByPoints(color, points) => {
