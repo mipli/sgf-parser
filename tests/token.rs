@@ -62,6 +62,14 @@ mod token_tests {
             SgfToken::from_pair("RE", "Draw"),
             SgfToken::Result(Outcome::Draw)
         );
+        assert_eq!(
+            SgfToken::from_pair("RE", "W+F"),
+            SgfToken::Result(Outcome::WinnerByForfeit(Color::White))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RE", "B+Forfeit"),
+            SgfToken::Result(Outcome::WinnerByForfeit(Color::Black))
+        );
     }
 
     #[test]

@@ -2,7 +2,7 @@ use crate::{SgfError, SgfErrorKind};
 use std::ops::Not;
 use crate::token::Action::{Pass, Move};
 use crate::token::Color::{Black, White};
-use crate::token::Outcome::{WinnerByPoints, WinnerByResign, WinnerByTime, Draw};
+use crate::token::Outcome::{WinnerByPoints, WinnerByResign, WinnerByTime, Draw, WinnerByForfeit};
 
 /// Indicates what color the token is related to
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -25,9 +25,23 @@ impl Not for Color {
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Outcome {
     WinnerByResign(Color),
+    WinnerByForfeit(Color),
     WinnerByPoints(Color, f32),
     WinnerByTime(Color),
     Draw,
+}
+
+impl Outcome {
+    pub fn get_winner(self) -> Option<Color> {
+        match self {
+            WinnerByTime(color) |
+            WinnerByForfeit(color) |
+            WinnerByPoints(color, ..) |
+            WinnerByResign(color)
+            => Some(color),
+            _ => None
+        }
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -239,6 +253,12 @@ impl Into<String> for &SgfToken {
                                                    }
                     )
                     ,
+                    WinnerByForfeit(color) => format!("RE[{}+F]",
+                                                      match color {
+                                                          Black => "B",
+                                                          White => "W"
+                                                      }
+                    ),
                     Draw => "RE[Draw]".to_string()
                 }
             }
@@ -372,7 +392,8 @@ fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
     };
 
     let outcome = match &winner_option[1] as &str {
-        "F" | "Forfeit" | "R" | "Resign" => Ok(WinnerByResign(winner)),
+        "F" | "Forfeit" => Ok(WinnerByForfeit(winner)),
+        "R" | "Resign" => Ok(WinnerByResign(winner)),
         "T" | "Time" => Ok(WinnerByTime(winner)),
         points => {
             if let Ok(outcome) = points.parse::<f32>().map(|score|
