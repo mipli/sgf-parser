@@ -106,20 +106,24 @@ fn parse_pair(pair: Pair<'_, Rule>) -> ParserNode<'_> {
         Rule::node => ParserNode::Node(pair.into_inner().map(parse_pair).collect()),
         Rule::property => {
             let text_nodes = pair.into_inner().map(parse_pair).collect::<Vec<_>>();
-            let (_, ts) = text_nodes.iter().try_fold((None, vec![]), |(ident, mut tokens), value| {
-                if let ParserNode::Text(value) = value {
-                    match ident {
-                        None => Some((Some(*value), tokens)),
-                        Some(id) => {
-                            tokens.push(SgfToken::from_pair(id, value));
-                            Some((ident, tokens))
+            let (_, ts) = text_nodes
+                .iter()
+                .try_fold((None, vec![]), |(ident, mut tokens), value| {
+                    if let ParserNode::Text(value) = value {
+                        match ident {
+                            None => Some((Some(*value), tokens)),
+                            Some(id) => {
+                                tokens.push(SgfToken::from_pair(id, value));
+                                Some((ident, tokens))
+                            }
                         }
+                    } else {
+                        None
                     }
-                } else {
-                    None
-                }
-
-            }).expect("Pest parsing guarantee that all properties have an identifier and a value");
+                })
+                .expect(
+                    "Pest parsing guarantee that all properties have an identifier and a value",
+                );
             ParserNode::Token(ts)
         }
         Rule::property_identifier => ParserNode::Text(pair.as_str()),

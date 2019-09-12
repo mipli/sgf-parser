@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod parser_tests {
-    use sgf_parser::*;
     use sgf_parser::Action::Move;
+    use sgf_parser::*;
 
     #[test]
     fn errors_on_invalid_root_token_placement() {
@@ -109,7 +109,7 @@ mod parser_tests {
                         color: Color::Black,
                         action: Move(1, 1),
                     }],
-                }, ],
+                },],
                 variations: vec![
                     GameTree {
                         nodes: vec![GameNode {
@@ -117,7 +117,7 @@ mod parser_tests {
                                 color: Color::White,
                                 action: Move(2, 2),
                             }],
-                        }, ],
+                        },],
                         variations: vec![],
                     },
                     GameTree {
@@ -126,7 +126,7 @@ mod parser_tests {
                                 color: Color::White,
                                 action: Move(3, 3),
                             }],
-                        }, ],
+                        },],
                         variations: vec![],
                     }
                 ],
@@ -185,7 +185,7 @@ mod parser_tests {
                         }],
                     },
                     GameNode {
-                        tokens: vec![SgfToken::Unknown(("FO".to_string(), "asdf".to_string())), ],
+                        tokens: vec![SgfToken::Unknown(("FO".to_string(), "asdf".to_string())),],
                     },
                     GameNode {
                         tokens: vec![SgfToken::Move {
@@ -208,8 +208,8 @@ mod parser_tests {
             sgf,
             GameTree {
                 nodes: vec![GameNode {
-                    tokens: vec![SgfToken::Comment("a [wrapped\\] comment".to_string()), ],
-                }, ],
+                    tokens: vec![SgfToken::Comment("a [wrapped\\] comment".to_string()),],
+                },],
                 variations: vec![],
             }
         );
@@ -225,11 +225,20 @@ mod parser_tests {
             GameTree {
                 nodes: vec![GameNode {
                     tokens: vec![
-                        SgfToken::Add{ color: Color::Black, coordinate: (1, 1)},
-                        SgfToken::Add{ color: Color::Black, coordinate: (1, 2)},
-                        SgfToken::Add{ color: Color::Black, coordinate: (3, 3)},
+                        SgfToken::Add {
+                            color: Color::Black,
+                            coordinate: (1, 1)
+                        },
+                        SgfToken::Add {
+                            color: Color::Black,
+                            coordinate: (1, 2)
+                        },
+                        SgfToken::Add {
+                            color: Color::Black,
+                            coordinate: (3, 3)
+                        },
                     ],
-                }, ],
+                },],
                 variations: vec![],
             }
         );

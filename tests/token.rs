@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod token_tests {
-    use sgf_parser::*;
     use sgf_parser::Action::Move;
+    use sgf_parser::*;
 
     #[test]
     fn can_parse_move_tokens() {
@@ -270,18 +270,9 @@ mod token_tests {
 
     #[test]
     fn can_parse_handicap_token() {
-        assert_eq!(
-            SgfToken::from_pair("HA", "3"),
-            SgfToken::Handicap(3)
-        );
-        assert_eq!(
-            SgfToken::from_pair("HA", "0"),
-            SgfToken::Handicap(0)
-        );
-        assert_eq!(
-            SgfToken::from_pair("HA", "999"),
-            SgfToken::Handicap(999)
-        )
+        assert_eq!(SgfToken::from_pair("HA", "3"), SgfToken::Handicap(3));
+        assert_eq!(SgfToken::from_pair("HA", "0"), SgfToken::Handicap(0));
+        assert_eq!(SgfToken::from_pair("HA", "999"), SgfToken::Handicap(999))
     }
 
     #[test]

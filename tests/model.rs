@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod model_tests {
-    use sgf_parser::*;
     use sgf_parser::Action::Move;
+    use sgf_parser::*;
 
     #[test]
     fn can_get_unknown_nodes() {
