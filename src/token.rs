@@ -1,8 +1,8 @@
+use crate::token::Action::{Move, Pass};
+use crate::token::Color::{Black, White};
+use crate::token::Outcome::{Draw, WinnerByForfeit, WinnerByPoints, WinnerByResign, WinnerByTime};
 use crate::{SgfError, SgfErrorKind};
 use std::ops::Not;
-use crate::token::Action::{Pass, Move};
-use crate::token::Color::{Black, White};
-use crate::token::Outcome::{WinnerByPoints, WinnerByResign, WinnerByTime, Draw, WinnerByForfeit};
 
 /// Indicates what color the token is related to
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -20,7 +20,6 @@ impl Not for Color {
         }
     }
 }
-
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Outcome {
@@ -53,6 +52,7 @@ impl Outcome {
 /// "GOE" (the Ing rules of Goe)
 /// "Japanese" (the Nihon-Kiin rule set)
 /// "NZ" (New Zealand rules)
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Rule {
     Japanese,
     NZ,
@@ -62,19 +62,31 @@ pub enum Rule {
     Unknown(String),
 }
 
-impl From<String> for Rule {
-    fn from(s: String) -> Self {
-        match &s as &str {
+impl From<&str> for Rule {
+    fn from(s: &str) -> Self {
+        match s {
             "Japanese" => Rule::Japanese,
             "AGA" => Rule::AGA,
             "NZ" => Rule::NZ,
             "Chinese" => Rule::Chinese,
             "GOE" => Rule::GOE,
-            value => Rule::Unknown(value.to_owned())
+            value => Rule::Unknown(value.to_owned()),
         }
     }
 }
 
+impl ToString for Rule {
+    fn to_string(&self) -> String {
+        match self {
+            Rule::Japanese => "Japanese",
+            Rule::NZ => "NZ",
+            Rule::GOE => "GOE",
+            Rule::AGA => "AGA",
+            Rule::Chinese => "Chinese",
+            Rule::Unknown(v) => v,
+        }.to_owned()
+    }
+}
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Action {
@@ -90,6 +102,7 @@ pub enum SgfToken {
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
+    RU(Rule),
     Result(Outcome),
     Komi(f32),
     Event(String),
@@ -148,6 +161,7 @@ impl SgfToken {
                 Ok(value) => Some(SgfToken::Handicap(value)),
                 _ => None,
             },
+            "RU" => Some(SgfToken::RU(Rule::from(value))),
             "SQ" => str_to_coordinates(value)
                 .ok()
                 .map(|coordinate| SgfToken::Square { coordinate }),
@@ -260,6 +274,7 @@ impl Into<String> for &SgfToken {
                 format!("LB[{}:{}]", value, label)
             }
             SgfToken::Handicap(nb_stones) => format!("HA[{}]", nb_stones),
+            SgfToken::RU(rule) => format!("RU[{}]", rule.to_string()),
             SgfToken::Result(outcome) => match outcome {
                 WinnerByPoints(color, points) => format!(
                     "RE[{}+{}]",
@@ -371,7 +386,6 @@ fn split_size_text(input: &str) -> Option<(u32, u32)> {
     Some((width, height))
 }
 
-
 /// Converts goban coordinates to string representation
 fn coordinate_to_str(coordinate: (u8, u8)) -> String {
     let x = (coordinate.0 + 96) as char;
@@ -389,20 +403,20 @@ fn split_label_text(input: &str) -> Option<(&str, &str)> {
     }
 }
 
-///Provides the result of the game. It is MANDATORY to use the
-///following format:
-///"0" (zero) or "Draw" for a draw (jigo),
-///"B+" ["score"] for a black win and
-///"W+" ["score"] for a white win
-///Score is optional (some games don't have a score e.g. chess).
-///If the score is given it has to be given as a real value,
-///e.g. "B+0.5", "W+64", "B+12.5"
-///Use "B+R" or "B+Resign" and "W+R" or "W+Resign" for a win by
-///resignation. Applications must not write "Black resigns".
-///Use "B+T" or "B+Time" and "W+T" or "W+Time" for a win on time,
-///"B+F" or "B+Forfeit" and "W+F" or "W+Forfeit" for a win by
-///forfeit,
-///"Void" for no result or suspended play and
+/// Provides the result of the game. It is MANDATORY to use the
+/// following format:
+/// "0" (zero) or "Draw" for a draw (jigo),
+/// "B+" ["score"] for a black win and
+/// "W+" ["score"] for a white win
+/// Score is optional (some games don't have a score e.g. chess).
+/// If the score is given it has to be given as a real value,
+/// e.g. "B+0.5", "W+64", "B+12.5"
+/// Use "B+R" or "B+Resign" and "W+R" or "W+Resign" for a win by
+/// resignation. Applications must not write "Black resigns".
+/// Use "B+T" or "B+Time" and "W+T" or "W+Time" for a win on time,
+/// "B+F" or "B+Forfeit" and "W+F" or "W+Forfeit" for a win by
+/// forfeit,
+/// "Void" for no result or suspended play and
 fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
     if s.is_empty() || s == "Void" {
         return Err(SgfError::from(SgfErrorKind::ParseError));
@@ -445,7 +459,7 @@ fn move_str_to_coord(input: &str) -> Result<Action, SgfError> {
     } else {
         match str_to_coordinates(input) {
             Ok(coordinates) => Ok(Move(coordinates.0, coordinates.1)),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
     }
 }
