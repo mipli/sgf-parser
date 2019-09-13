@@ -42,6 +42,39 @@ impl Outcome {
     }
 }
 
+///Provides the used rules for this game.
+///Because there are many different rules, SGF requires
+///mandatory names only for a small set of well known rule sets.
+///Note: it's beyond the scope of this specification to give an
+///exact specification of these rule sets.
+///Mandatory names for Go (GM[1]):
+/// "AGA" (rules of the American Go Association)
+/// "GOE" (the Ing rules of Goe)
+/// "Japanese" (the Nihon-Kiin rule set)
+/// "NZ" (New Zealand rules)
+pub enum Rule {
+    Japanese,
+    NZ,
+    GOE,
+    AGA,
+    Chinese,
+    Unknown(String),
+}
+
+impl From<String> for Rule {
+    fn from(s: String) -> Self {
+        match &s as &str {
+            "Japanese" => Rule::Japanese,
+            "AGA" => Rule::AGA,
+            "NZ" => Rule::NZ,
+            "Chinese" => Rule::Chinese,
+            "GOE" => Rule::GOE,
+            value => Rule::Unknown(value.to_owned())
+        }
+    }
+}
+
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Action {
     Move(u8, u8),
@@ -57,6 +90,7 @@ pub enum SgfToken {
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
     Result(Outcome),
+    RU(Rule),
     Komi(f32),
     Event(String),
     Copyright(String),
