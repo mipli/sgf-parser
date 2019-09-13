@@ -1,8 +1,8 @@
-use crate::token::Action::{Move, Pass};
-use crate::token::Color::{Black, White};
-use crate::token::Outcome::{Draw, WinnerByForfeit, WinnerByPoints, WinnerByResign, WinnerByTime};
 use crate::{SgfError, SgfErrorKind};
 use std::ops::Not;
+use crate::token::Action::{Pass, Move};
+use crate::token::Color::{Black, White};
+use crate::token::Outcome::{WinnerByPoints, WinnerByResign, WinnerByTime, Draw, WinnerByForfeit};
 
 /// Indicates what color the token is related to
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -20,6 +20,7 @@ impl Not for Color {
         }
     }
 }
+
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Outcome {
@@ -90,7 +91,6 @@ pub enum SgfToken {
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
     Result(Outcome),
-    RU(Rule),
     Komi(f32),
     Event(String),
     Copyright(String),
@@ -144,11 +144,10 @@ impl SgfToken {
                         coordinate,
                     })
             }),
-            "HA" => Some(SgfToken::Handicap(
-                value
-                    .parse()
-                    .expect(&format!("Error parsing the handicap value : {}", value)),
-            )),
+            "HA" => match value.parse() {
+                Ok(value) => Some(SgfToken::Handicap(value)),
+                _ => None,
+            },
             "SQ" => str_to_coordinates(value)
                 .ok()
                 .map(|coordinate| SgfToken::Square { coordinate }),
@@ -203,7 +202,7 @@ impl SgfToken {
                 color: Color::White,
                 rank: value.to_string(),
             }),
-            "RE" => parse_outcome_str(value).ok().map(|o| SgfToken::Result(o)),
+            "RE" => parse_outcome_str(value).ok().map(SgfToken::Result),
             "KM" => value.parse().ok().map(SgfToken::Komi),
             "SZ" => {
                 if let Some((width, height)) = split_size_text(value) {
@@ -372,6 +371,7 @@ fn split_size_text(input: &str) -> Option<(u32, u32)> {
     Some((width, height))
 }
 
+
 /// Converts goban coordinates to string representation
 fn coordinate_to_str(coordinate: (u8, u8)) -> String {
     let x = (coordinate.0 + 96) as char;
@@ -411,7 +411,7 @@ fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
         return Ok(Draw);
     }
 
-    let winner_option: Vec<&str> = s.split("+").collect();
+    let winner_option: Vec<&str> = s.split('+').collect();
     if winner_option.len() != 2 {
         return Err(SgfError::from(SgfErrorKind::ParseError));
     }
@@ -422,7 +422,7 @@ fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
         _ => return Err(SgfError::from(SgfErrorKind::ParseError)),
     };
 
-    let outcome = match &winner_option[1] as &str {
+    match &winner_option[1] as &str {
         "F" | "Forfeit" => Ok(WinnerByForfeit(winner)),
         "R" | "Resign" => Ok(WinnerByResign(winner)),
         "T" | "Time" => Ok(WinnerByTime(winner)),
@@ -436,9 +436,7 @@ fn parse_outcome_str(s: &str) -> Result<Outcome, SgfError> {
                 Err(SgfError::from(SgfErrorKind::ParseError))
             }
         }
-    };
-
-    outcome
+    }
 }
 
 fn move_str_to_coord(input: &str) -> Result<Action, SgfError> {
@@ -447,7 +445,7 @@ fn move_str_to_coord(input: &str) -> Result<Action, SgfError> {
     } else {
         match str_to_coordinates(input) {
             Ok(coordinates) => Ok(Move(coordinates.0, coordinates.1)),
-            Err(e) => Err(e),
+            Err(e) => Err(e)
         }
     }
 }

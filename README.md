@@ -7,6 +7,12 @@ A [SGF](https://www.red-bean.com/sgf/index.html) Parser for Rust. Supports all S
 
 Using `pest` for the actual parsing part.
 
+# Development
+
+Code quality is ensured by running both `cargo clippy` and `cargo fmt` on each commit. 
+
+All code should also be unit tested.
+
 # Example usage
 ```rust
 use sgf_parser::*;
