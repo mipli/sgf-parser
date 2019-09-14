@@ -103,7 +103,7 @@ pub enum SgfToken {
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
-    RU(RuleSet),
+    Rule(RuleSet),
     Result(Outcome),
     Komi(f32),
     Event(String),
@@ -162,7 +162,7 @@ impl SgfToken {
                 Ok(value) => Some(SgfToken::Handicap(value)),
                 _ => None,
             },
-            "RU" => Some(SgfToken::RU(RuleSet::from(value))),
+            "RU" => Some(SgfToken::Rule(RuleSet::from(value))),
             "SQ" => str_to_coordinates(value)
                 .ok()
                 .map(|coordinate| SgfToken::Square { coordinate }),
@@ -275,7 +275,7 @@ impl Into<String> for &SgfToken {
                 format!("LB[{}:{}]", value, label)
             }
             SgfToken::Handicap(nb_stones) => format!("HA[{}]", nb_stones),
-            SgfToken::RU(rule) => format!("RU[{}]", rule.to_string()),
+            SgfToken::Rule(rule) => format!("RU[{}]", rule.to_string()),
             SgfToken::Result(outcome) => match outcome {
                 WinnerByPoints(color, points) => format!(
                     "RE[{}+{}]",

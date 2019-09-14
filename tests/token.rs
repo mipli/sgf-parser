@@ -76,19 +76,19 @@ mod token_tests {
     fn can_parse_ru_token() {
         assert_eq!(
             SgfToken::from_pair("RU", "Japanese"),
-            SgfToken::RU(RuleSet::Japanese)
+            SgfToken::Rule(RuleSet::Japanese)
         );
-        assert_eq!(SgfToken::from_pair("RU", "AGA"), SgfToken::RU(RuleSet::AGA));
+        assert_eq!(SgfToken::from_pair("RU", "AGA"), SgfToken::Rule(RuleSet::AGA));
         assert_eq!(
             SgfToken::from_pair("RU", "Chinese"),
-            SgfToken::RU(RuleSet::Chinese)
+            SgfToken::Rule(RuleSet::Chinese)
         );
-        assert_eq!(SgfToken::from_pair("RU", "NZ"), SgfToken::RU(RuleSet::NZ));
+        assert_eq!(SgfToken::from_pair("RU", "NZ"), SgfToken::Rule(RuleSet::NZ));
         assert_eq!(
             SgfToken::from_pair("RU", "TEST"),
-            SgfToken::RU(RuleSet::Unknown("TEST".to_owned()))
+            SgfToken::Rule(RuleSet::Unknown("TEST".to_owned()))
         );
-        assert_eq!(SgfToken::from_pair("RU", "GOE"), SgfToken::RU(RuleSet::GOE));
+        assert_eq!(SgfToken::from_pair("RU", "GOE"), SgfToken::Rule(RuleSet::GOE));
     }
 
     #[test]
