@@ -53,7 +53,7 @@ impl Outcome {
 /// "Japanese" (the Nihon-Kiin rule set)
 /// "NZ" (New Zealand rules)
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Rule {
+pub enum RuleSet {
     Japanese,
     NZ,
     GOE,
@@ -62,28 +62,28 @@ pub enum Rule {
     Unknown(String),
 }
 
-impl From<&str> for Rule {
+impl From<&str> for RuleSet {
     fn from(s: &str) -> Self {
         match s {
-            "Japanese" => Rule::Japanese,
-            "AGA" => Rule::AGA,
-            "NZ" => Rule::NZ,
-            "Chinese" => Rule::Chinese,
-            "GOE" => Rule::GOE,
-            value => Rule::Unknown(value.to_owned()),
+            "Japanese" => RuleSet::Japanese,
+            "AGA" => RuleSet::AGA,
+            "NZ" => RuleSet::NZ,
+            "Chinese" => RuleSet::Chinese,
+            "GOE" => RuleSet::GOE,
+            value => RuleSet::Unknown(value.to_owned()),
         }
     }
 }
 
-impl ToString for Rule {
+impl ToString for RuleSet {
     fn to_string(&self) -> String {
         match self {
-            Rule::Japanese => "Japanese",
-            Rule::NZ => "NZ",
-            Rule::GOE => "GOE",
-            Rule::AGA => "AGA",
-            Rule::Chinese => "Chinese",
-            Rule::Unknown(v) => v,
+            RuleSet::Japanese => "Japanese",
+            RuleSet::NZ => "NZ",
+            RuleSet::GOE => "GOE",
+            RuleSet::AGA => "AGA",
+            RuleSet::Chinese => "Chinese",
+            RuleSet::Unknown(v) => v,
         }
         .to_owned()
     }
@@ -103,7 +103,7 @@ pub enum SgfToken {
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
-    RU(Rule),
+    RU(RuleSet),
     Result(Outcome),
     Komi(f32),
     Event(String),
@@ -162,7 +162,7 @@ impl SgfToken {
                 Ok(value) => Some(SgfToken::Handicap(value)),
                 _ => None,
             },
-            "RU" => Some(SgfToken::RU(Rule::from(value))),
+            "RU" => Some(SgfToken::RU(RuleSet::from(value))),
             "SQ" => str_to_coordinates(value)
                 .ok()
                 .map(|coordinate| SgfToken::Square { coordinate }),
