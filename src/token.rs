@@ -84,7 +84,8 @@ impl ToString for Rule {
             Rule::AGA => "AGA",
             Rule::Chinese => "Chinese",
             Rule::Unknown(v) => v,
-        }.to_owned()
+        }
+        .to_owned()
     }
 }
 
