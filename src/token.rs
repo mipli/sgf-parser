@@ -112,7 +112,6 @@ pub enum Encoding {
 pub enum SgfToken {
     Add { color: Color, coordinate: (u8, u8) },
     Move { color: Color, action: Action },
-    MovesRemaining { color: Color, moves: u32 },
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
@@ -126,7 +125,9 @@ pub enum SgfToken {
     Place(String),
     Date(String),
     Size(u32, u32),
+    Overtime(String),
     TimeLimit(u32),
+    MovesRemaining { color: Color, moves: u32 },
     Handicap(u32),
     Comment(String),
     Charset(Encoding),
@@ -244,6 +245,7 @@ impl SgfToken {
             }
             "TM" => value.parse().ok().map(SgfToken::TimeLimit),
             "EV" => Some(SgfToken::Event(value.to_string())),
+            "OT" => Some(SgfToken::Overtime(value.to_string())),
             "C" => Some(SgfToken::Comment(value.to_string())),
             "GN" => Some(SgfToken::GameName(value.to_string())),
             "CR" => Some(SgfToken::Copyright(value.to_string())),
@@ -414,6 +416,7 @@ impl Into<String> for &SgfToken {
             SgfToken::TimeLimit(time) => format!("TM[{}]", time),
             SgfToken::Event(value) => format!("EV[{}]", value),
             SgfToken::Comment(value) => format!("C[{}]", value),
+            SgfToken::Overtime(value) => format!("OT[{}]", value),
             SgfToken::GameName(value) => format!("GN[{}]", value),
             SgfToken::Copyright(value) => format!("CR[{}]", value),
             SgfToken::Date(value) => format!("DT[{}]", value),

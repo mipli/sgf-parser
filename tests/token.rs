@@ -394,4 +394,12 @@ mod token_tests {
         let string_token: String = token.into();
         assert_eq!(string_token, "AP[CGoban:1.6.2]");
     }
+
+    #[test]
+    fn can_parse_overtime_token() {
+        let token = SgfToken::from_pair("OT", "15/300 Canadian");
+        assert_eq!(token, SgfToken::Overtime("15/300 Canadian".to_string()));
+        let string_token: String = token.into();
+        assert_eq!(string_token, "OT[15/300 Canadian]");
+    }
 }
