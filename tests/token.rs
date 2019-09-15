@@ -73,6 +73,31 @@ mod token_tests {
     }
 
     #[test]
+    fn can_parse_ru_token() {
+        assert_eq!(
+            SgfToken::from_pair("RU", "Japanese"),
+            SgfToken::Rule(RuleSet::Japanese)
+        );
+        assert_eq!(
+            SgfToken::from_pair("RU", "AGA"),
+            SgfToken::Rule(RuleSet::AGA)
+        );
+        assert_eq!(
+            SgfToken::from_pair("RU", "Chinese"),
+            SgfToken::Rule(RuleSet::Chinese)
+        );
+        assert_eq!(SgfToken::from_pair("RU", "NZ"), SgfToken::Rule(RuleSet::NZ));
+        assert_eq!(
+            SgfToken::from_pair("RU", "TEST"),
+            SgfToken::Rule(RuleSet::Unknown("TEST".to_owned()))
+        );
+        assert_eq!(
+            SgfToken::from_pair("RU", "GOE"),
+            SgfToken::Rule(RuleSet::GOE)
+        );
+    }
+
+    #[test]
     fn can_parse_time_tokens() {
         let token = SgfToken::from_pair("BL", "1234");
         assert_eq!(
