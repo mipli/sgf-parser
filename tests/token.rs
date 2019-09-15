@@ -340,4 +340,16 @@ mod token_tests {
         let string_token: String = token.into();
         assert_eq!(string_token, "AW[kk]");
     }
+
+    #[test]
+    fn can_parse_charset_token() {
+        assert_eq!(SgfToken::from_pair("CA", "UTF-8"), SgfToken::Charset(Encoding::UTF8));
+        assert_eq!(
+            SgfToken::from_pair("CA", "ISO-8859-1"),
+            SgfToken::Charset(Encoding::Other("ISO-8859-1".to_string()))
+        );
+        let token = SgfToken::from_pair("CA", "UTF-8");
+        let string_token: String = token.into();
+        assert_eq!(string_token, "CA[UTF-8]");
+    }
 }

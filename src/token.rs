@@ -101,6 +101,12 @@ pub enum Game {
     Other(u8),
 }
 
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub enum Encoding {
+    UTF8,
+    Other(String),
+}
+
 /// Enum describing all possible SGF Properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
@@ -122,6 +128,7 @@ pub enum SgfToken {
     TimeLimit(u32),
     Handicap(u32),
     Comment(String),
+    Charset(Encoding),
     Unknown((String, String)),
     Invalid((String, String)),
     Square { coordinate: (u8, u8) },
@@ -247,6 +254,10 @@ impl SgfToken {
                     base_ident.to_string(),
                     value.to_string(),
                 ))),
+            },
+            "CA" => match value.to_string().to_lowercase().as_str() {
+                "utf-8" => Some(SgfToken::Charset(Encoding::UTF8)),
+                _ => Some(SgfToken::Charset(Encoding::Other(value.to_string()))),
             },
             _ => Some(SgfToken::Unknown((
                 base_ident.to_string(),
@@ -387,6 +398,13 @@ impl Into<String> for &SgfToken {
                 match game {
                     Game::Go => &1u8,
                     Game::Other(n) => n,
+                }
+            ),
+            SgfToken::Charset(encoding) => format!(
+                "CA[{}]",
+                match encoding {
+                    Encoding::UTF8 => "UTF-8",
+                    Encoding::Other(e) => e,
                 }
             ),
             _ => panic!(),
