@@ -95,31 +95,87 @@ pub enum Action {
     Pass,
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum Game {
+    Go,
+    Other(u8),
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub enum Encoding {
+    UTF8,
+    Other(String),
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum DisplayNodes {
+    Children,
+    Siblings,
+}
+
 /// Enum describing all possible SGF Properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
-    Add { color: Color, coordinate: (u8, u8) },
-    Move { color: Color, action: Action },
-    Time { color: Color, time: u32 },
-    PlayerName { color: Color, name: String },
-    PlayerRank { color: Color, rank: String },
+    Add {
+        color: Color,
+        coordinate: (u8, u8),
+    },
+    Move {
+        color: Color,
+        action: Action,
+    },
+    Time {
+        color: Color,
+        time: u32,
+    },
+    PlayerName {
+        color: Color,
+        name: String,
+    },
+    PlayerRank {
+        color: Color,
+        rank: String,
+    },
+    Game(Game),
     Rule(RuleSet),
     Result(Outcome),
     Komi(f32),
     Event(String),
     Copyright(String),
     GameName(String),
+    VariationDisplay {
+        nodes: DisplayNodes,
+        on_board_display: bool,
+    },
     Place(String),
     Date(String),
     Size(u32, u32),
+    FileFormat(u8),
+    Overtime(String),
     TimeLimit(u32),
+    MovesRemaining {
+        color: Color,
+        moves: u32,
+    },
     Handicap(u32),
     Comment(String),
+    Charset(Encoding),
+    Application {
+        name: String,
+        version: String,
+    },
     Unknown((String, String)),
     Invalid((String, String)),
-    Square { coordinate: (u8, u8) },
-    Triangle { coordinate: (u8, u8) },
-    Label { label: String, coordinate: (u8, u8) },
+    Square {
+        coordinate: (u8, u8),
+    },
+    Triangle {
+        coordinate: (u8, u8),
+    },
+    Label {
+        label: String,
+        coordinate: (u8, u8),
+    },
 }
 
 impl SgfToken {
@@ -226,13 +282,59 @@ impl SgfToken {
                     value.parse().ok().map(|size| SgfToken::Size(size, size))
                 }
             }
+            "FF" => value.parse().ok().map(|v| match v {
+                0..=4 => SgfToken::FileFormat(v),
+                _ => SgfToken::Invalid((ident.to_string(), value.to_string())),
+            }),
             "TM" => value.parse().ok().map(SgfToken::TimeLimit),
             "EV" => Some(SgfToken::Event(value.to_string())),
+            "OT" => Some(SgfToken::Overtime(value.to_string())),
             "C" => Some(SgfToken::Comment(value.to_string())),
             "GN" => Some(SgfToken::GameName(value.to_string())),
             "CR" => Some(SgfToken::Copyright(value.to_string())),
             "DT" => Some(SgfToken::Date(value.to_string())),
             "PC" => Some(SgfToken::Place(value.to_string())),
+            "GM" => match value.parse::<u8>() {
+                Ok(1) => Some(SgfToken::Game(Game::Go)),
+                Ok(n) => Some(SgfToken::Game(Game::Other(n))),
+                Err(_) => Some(SgfToken::Invalid((
+                    base_ident.to_string(),
+                    value.to_string(),
+                ))),
+            },
+            "CA" => match value.to_string().to_lowercase().as_str() {
+                "utf-8" => Some(SgfToken::Charset(Encoding::UTF8)),
+                _ => Some(SgfToken::Charset(Encoding::Other(value.to_string()))),
+            },
+            "OB" => match value.parse::<u32>() {
+                Ok(n) => Some(SgfToken::MovesRemaining {
+                    color: Color::Black,
+                    moves: n,
+                }),
+                Err(_) => Some(SgfToken::Invalid((
+                    base_ident.to_string(),
+                    value.to_string(),
+                ))),
+            },
+            "OW" => match value.parse::<u32>() {
+                Ok(n) => Some(SgfToken::MovesRemaining {
+                    color: Color::White,
+                    moves: n,
+                }),
+                Err(_) => Some(SgfToken::Invalid((
+                    base_ident.to_string(),
+                    value.to_string(),
+                ))),
+            },
+            "AP" => parse_application_str(value)
+                .ok()
+                .map(|(name, version)| SgfToken::Application { name, version }),
+            "ST" => parse_variation_display_str(value)
+                .ok()
+                .map(|(nodes, on_board_display)| SgfToken::VariationDisplay {
+                    nodes,
+                    on_board_display,
+                }),
             _ => Some(SgfToken::Unknown((
                 base_ident.to_string(),
                 value.to_string(),
@@ -358,16 +460,54 @@ impl Into<String> for &SgfToken {
                 format!("{}[{}]", token, rank)
             }
             SgfToken::Komi(komi) => format!("KM[{}]", komi),
+            SgfToken::FileFormat(v) => format!("FF[{}]", v),
             SgfToken::Size(width, height) if width == height => format!("SZ[{}]", width),
             SgfToken::Size(width, height) => format!("SZ[{}:{}]", width, height),
             SgfToken::TimeLimit(time) => format!("TM[{}]", time),
             SgfToken::Event(value) => format!("EV[{}]", value),
             SgfToken::Comment(value) => format!("C[{}]", value),
+            SgfToken::Overtime(value) => format!("OT[{}]", value),
             SgfToken::GameName(value) => format!("GN[{}]", value),
             SgfToken::Copyright(value) => format!("CR[{}]", value),
             SgfToken::Date(value) => format!("DT[{}]", value),
             SgfToken::Place(value) => format!("PC[{}]", value),
-            _ => panic!(),
+            SgfToken::Game(game) => format!(
+                "GM[{}]",
+                match game {
+                    Game::Go => &1u8,
+                    Game::Other(n) => n,
+                }
+            ),
+            SgfToken::Charset(encoding) => format!(
+                "CA[{}]",
+                match encoding {
+                    Encoding::UTF8 => "UTF-8",
+                    Encoding::Other(e) => e,
+                }
+            ),
+            SgfToken::MovesRemaining { color, moves } => format!(
+                "O{}[{}]",
+                match color {
+                    Color::Black => 'B',
+                    Color::White => 'W',
+                },
+                moves
+            ),
+            SgfToken::VariationDisplay {
+                nodes,
+                on_board_display,
+            } => {
+                let num = match (nodes, on_board_display) {
+                    (DisplayNodes::Children, true) => 0,
+                    (DisplayNodes::Siblings, true) => 1,
+                    (DisplayNodes::Children, false) => 2,
+                    (DisplayNodes::Siblings, false) => 3,
+                };
+                format!("ST[{}]", num)
+            }
+            SgfToken::Application { name, version } => format!("AP[{}:{}]", name, version),
+            SgfToken::Unknown((ident, prop)) => format!("{}[{}]", ident, prop),
+            SgfToken::Invalid((ident, prop)) => format!("{}[{}]", ident, prop),
         }
     }
 }
@@ -402,6 +542,24 @@ fn split_label_text(input: &str) -> Option<(&str, &str)> {
     } else {
         None
     }
+}
+
+fn parse_variation_display_str(input: &str) -> Result<(DisplayNodes, bool), SgfError> {
+    match input.parse::<u8>() {
+        Ok(0) => Ok((DisplayNodes::Children, true)),
+        Ok(1) => Ok((DisplayNodes::Siblings, true)),
+        Ok(2) => Ok((DisplayNodes::Children, false)),
+        Ok(3) => Ok((DisplayNodes::Siblings, false)),
+        _ => Err(SgfError::from(SgfErrorKind::ParseError)),
+    }
+}
+
+fn parse_application_str(input: &str) -> Result<(String, String), SgfError> {
+    let index = input
+        .find(':')
+        .ok_or_else(|| SgfError::from(SgfErrorKind::ParseError))?;
+    let (name, version) = input.split_at(index);
+    Ok((name.to_string(), version[1..].to_string()))
 }
 
 /// Provides the result of the game. It is MANDATORY to use the

@@ -294,6 +294,22 @@ mod token_tests {
     }
 
     #[test]
+    fn can_parse_game_token() {
+        assert_eq!(SgfToken::from_pair("GM", "1"), SgfToken::Game(Game::Go));
+        assert_eq!(
+            SgfToken::from_pair("GM", "2"),
+            SgfToken::Game(Game::Other(2))
+        );
+        assert_eq!(
+            SgfToken::from_pair("GM", "error"),
+            SgfToken::Invalid(("GM".to_string(), "error".to_string()))
+        );
+        let token = SgfToken::from_pair("GM", "1");
+        let string_token: String = token.into();
+        assert_eq!(string_token, "GM[1]");
+    }
+
+    #[test]
     fn can_parse_handicap_token() {
         assert_eq!(SgfToken::from_pair("HA", "3"), SgfToken::Handicap(3));
         assert_eq!(SgfToken::from_pair("HA", "0"), SgfToken::Handicap(0));
@@ -323,5 +339,128 @@ mod token_tests {
         );
         let string_token: String = token.into();
         assert_eq!(string_token, "AW[kk]");
+    }
+
+    #[test]
+    fn can_parse_charset_token() {
+        assert_eq!(
+            SgfToken::from_pair("CA", "UTF-8"),
+            SgfToken::Charset(Encoding::UTF8)
+        );
+        assert_eq!(
+            SgfToken::from_pair("CA", "ISO-8859-1"),
+            SgfToken::Charset(Encoding::Other("ISO-8859-1".to_string()))
+        );
+        let token = SgfToken::from_pair("CA", "UTF-8");
+        let string_token: String = token.into();
+        assert_eq!(string_token, "CA[UTF-8]");
+    }
+
+    #[test]
+    fn can_parse_overtime_move_tokens() {
+        let token_black = SgfToken::from_pair("OB", "5");
+        assert_eq!(
+            token_black,
+            SgfToken::MovesRemaining {
+                color: Color::Black,
+                moves: 5
+            }
+        );
+        let string_black: String = token_black.into();
+        assert_eq!(string_black, "OB[5]");
+
+        let token_white = SgfToken::from_pair("OW", "23");
+        assert_eq!(
+            token_white,
+            SgfToken::MovesRemaining {
+                color: Color::White,
+                moves: 23
+            }
+        );
+        let string_white: String = token_white.into();
+        assert_eq!(string_white, "OW[23]");
+    }
+
+    #[test]
+    fn can_parse_application_token() {
+        let token = SgfToken::from_pair("AP", "CGoban:1.6.2");
+        assert_eq!(
+            token,
+            SgfToken::Application {
+                name: "CGoban".to_string(),
+                version: "1.6.2".to_string(),
+            }
+        );
+        let string_token: String = token.into();
+        assert_eq!(string_token, "AP[CGoban:1.6.2]");
+    }
+
+    #[test]
+    fn can_parse_overtime_token() {
+        let token = SgfToken::from_pair("OT", "15/300 Canadian");
+        assert_eq!(token, SgfToken::Overtime("15/300 Canadian".to_string()));
+        let string_token: String = token.into();
+        assert_eq!(string_token, "OT[15/300 Canadian]");
+    }
+
+    #[test]
+    fn can_parse_variation_display_token() {
+        let token_3 = SgfToken::from_pair("ST", "3");
+        assert_eq!(
+            token_3,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Siblings,
+                on_board_display: false
+            }
+        );
+        let string_token_3: String = token_3.into();
+        assert_eq!(string_token_3, "ST[3]");
+
+        let token_2 = SgfToken::from_pair("ST", "2");
+        assert_eq!(
+            token_2,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Children,
+                on_board_display: false
+            }
+        );
+        let string_token_2: String = token_2.into();
+        assert_eq!(string_token_2, "ST[2]");
+
+        let token_1 = SgfToken::from_pair("ST", "1");
+        assert_eq!(
+            token_1,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Siblings,
+                on_board_display: true
+            }
+        );
+        let string_token_1: String = token_1.into();
+        assert_eq!(string_token_1, "ST[1]");
+
+        let token_0 = SgfToken::from_pair("ST", "0");
+        assert_eq!(
+            token_0,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Children,
+                on_board_display: true
+            }
+        );
+        let string_token_0: String = token_0.into();
+        assert_eq!(string_token_0, "ST[0]");
+    }
+
+    #[test]
+    fn can_parse_fileformat_token() {
+        let token = SgfToken::from_pair("FF", "3");
+        assert_eq!(token, SgfToken::FileFormat(3));
+        let string_token: String = token.into();
+        assert_eq!(string_token, "FF[3]");
+
+        let token = SgfToken::from_pair("FF", "5");
+        assert_eq!(
+            token,
+            SgfToken::Invalid(("FF".to_string(), "5".to_string()))
+        );
     }
 }
