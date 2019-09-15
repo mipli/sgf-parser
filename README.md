@@ -17,7 +17,7 @@ All code should also be unit tested.
 ```rust
 use sgf_parser::*;
 
-let sgf_source = "(;EV[event]PB[black]PW[white]C[comment];B[aa])";
+let sgf_source = "(;C[comment]EV[event]PB[black]PW[white];B[aa])";
 let tree: Result<GameTree, SgfError> = parse(sgf_source);
 
 let tree = tree.unwrap();
