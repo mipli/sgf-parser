@@ -380,4 +380,18 @@ mod token_tests {
         let string_white: String = token_white.into();
         assert_eq!(string_white, "OW[23]");
     }
+
+    #[test]
+    fn can_parse_application_token() {
+        let token = SgfToken::from_pair("AP", "CGoban:1.6.2");
+        assert_eq!(
+            token,
+            SgfToken::Application {
+                name: "CGoban".to_string(),
+                version: "1.6.2".to_string(),
+            }
+        );
+        let string_token: String = token.into();
+        assert_eq!(string_token, "AP[CGoban:1.6.2]");
+    }
 }

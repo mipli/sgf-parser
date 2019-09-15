@@ -130,6 +130,7 @@ pub enum SgfToken {
     Handicap(u32),
     Comment(String),
     Charset(Encoding),
+    Application { name: String, version: String },
     Unknown((String, String)),
     Invalid((String, String)),
     Square { coordinate: (u8, u8) },
@@ -280,6 +281,9 @@ impl SgfToken {
                     value.to_string(),
                 ))),
             },
+            "AP" => parse_application_str(value)
+                .ok()
+                .map(|(name, version)| SgfToken::Application { name, version }),
             _ => Some(SgfToken::Unknown((
                 base_ident.to_string(),
                 value.to_string(),
@@ -436,6 +440,7 @@ impl Into<String> for &SgfToken {
                 },
                 moves
             ),
+            SgfToken::Application { name, version } => format!("AP[{}:{}]", name, version),
             SgfToken::Unknown((ident, prop)) => format!("{}[{}]", ident, prop),
             SgfToken::Invalid((ident, prop)) => format!("{}[{}]", ident, prop),
         }
@@ -472,6 +477,14 @@ fn split_label_text(input: &str) -> Option<(&str, &str)> {
     } else {
         None
     }
+}
+
+fn parse_application_str(input: &str) -> Result<(String, String), SgfError> {
+    let index = input
+        .find(':')
+        .ok_or_else(|| SgfError::from(SgfErrorKind::ParseError))?;
+    let (name, version) = input.split_at(index);
+    Ok((name.to_string(), version[1..].to_string()))
 }
 
 /// Provides the result of the game. It is MANDATORY to use the
