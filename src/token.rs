@@ -95,6 +95,12 @@ pub enum Action {
     Pass,
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum Game {
+    Go,
+    Other(u8),
+}
+
 /// Enum describing all possible SGF Properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
@@ -103,6 +109,7 @@ pub enum SgfToken {
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
+    Game(Game),
     Rule(RuleSet),
     Result(Outcome),
     Komi(f32),
@@ -233,6 +240,14 @@ impl SgfToken {
             "CR" => Some(SgfToken::Copyright(value.to_string())),
             "DT" => Some(SgfToken::Date(value.to_string())),
             "PC" => Some(SgfToken::Place(value.to_string())),
+            "GM" => match value.parse::<u8>() {
+                Ok(1) => Some(SgfToken::Game(Game::Go)),
+                Ok(n) => Some(SgfToken::Game(Game::Other(n))),
+                Err(_) => Some(SgfToken::Invalid((
+                    base_ident.to_string(),
+                    value.to_string(),
+                ))),
+            },
             _ => Some(SgfToken::Unknown((
                 base_ident.to_string(),
                 value.to_string(),
@@ -367,6 +382,13 @@ impl Into<String> for &SgfToken {
             SgfToken::Copyright(value) => format!("CR[{}]", value),
             SgfToken::Date(value) => format!("DT[{}]", value),
             SgfToken::Place(value) => format!("PC[{}]", value),
+            SgfToken::Game(game) => format!(
+                "GM[{}]",
+                match game {
+                    Game::Go => &1u8,
+                    Game::Other(n) => n,
+                }
+            ),
             _ => panic!(),
         }
     }

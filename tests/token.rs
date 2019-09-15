@@ -294,6 +294,22 @@ mod token_tests {
     }
 
     #[test]
+    fn can_parse_game_token() {
+        assert_eq!(SgfToken::from_pair("GM", "1"), SgfToken::Game(Game::Go));
+        assert_eq!(
+            SgfToken::from_pair("GM", "2"),
+            SgfToken::Game(Game::Other(2))
+        );
+        assert_eq!(
+            SgfToken::from_pair("GM", "error"),
+            SgfToken::Invalid(("GM".to_string(), "error".to_string()))
+        );
+        let token = SgfToken::from_pair("GM", "1");
+        let string_token: String = token.into();
+        assert_eq!(string_token, "GM[1]");
+    }
+
+    #[test]
     fn can_parse_handicap_token() {
         assert_eq!(SgfToken::from_pair("HA", "3"), SgfToken::Handicap(3));
         assert_eq!(SgfToken::from_pair("HA", "0"), SgfToken::Handicap(0));
