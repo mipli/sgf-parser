@@ -150,6 +150,7 @@ pub enum SgfToken {
     Place(String),
     Date(String),
     Size(u32, u32),
+    FileFormat(u8),
     Overtime(String),
     TimeLimit(u32),
     MovesRemaining {
@@ -281,6 +282,10 @@ impl SgfToken {
                     value.parse().ok().map(|size| SgfToken::Size(size, size))
                 }
             }
+            "FF" => value.parse().ok().map(|v| match v {
+                0..=4 => SgfToken::FileFormat(v),
+                _ => SgfToken::Invalid((ident.to_string(), value.to_string())),
+            }),
             "TM" => value.parse().ok().map(SgfToken::TimeLimit),
             "EV" => Some(SgfToken::Event(value.to_string())),
             "OT" => Some(SgfToken::Overtime(value.to_string())),
@@ -455,6 +460,7 @@ impl Into<String> for &SgfToken {
                 format!("{}[{}]", token, rank)
             }
             SgfToken::Komi(komi) => format!("KM[{}]", komi),
+            SgfToken::FileFormat(v) => format!("FF[{}]", v),
             SgfToken::Size(width, height) if width == height => format!("SZ[{}]", width),
             SgfToken::Size(width, height) => format!("SZ[{}:{}]", width, height),
             SgfToken::TimeLimit(time) => format!("TM[{}]", time),

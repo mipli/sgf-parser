@@ -449,4 +449,18 @@ mod token_tests {
         let string_token_0: String = token_0.into();
         assert_eq!(string_token_0, "ST[0]");
     }
+
+    #[test]
+    fn can_parse_fileformat_token() {
+        let token = SgfToken::from_pair("FF", "3");
+        assert_eq!(token, SgfToken::FileFormat(3));
+        let string_token: String = token.into();
+        assert_eq!(string_token, "FF[3]");
+
+        let token = SgfToken::from_pair("FF", "5");
+        assert_eq!(
+            token,
+            SgfToken::Invalid(("FF".to_string(), "5".to_string()))
+        );
+    }
 }
