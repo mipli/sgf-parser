@@ -112,6 +112,7 @@ pub enum Encoding {
 pub enum SgfToken {
     Add { color: Color, coordinate: (u8, u8) },
     Move { color: Color, action: Action },
+    MovesRemaining { color: Color, moves: u32 },
     Time { color: Color, time: u32 },
     PlayerName { color: Color, name: String },
     PlayerRank { color: Color, rank: String },
@@ -258,6 +259,26 @@ impl SgfToken {
             "CA" => match value.to_string().to_lowercase().as_str() {
                 "utf-8" => Some(SgfToken::Charset(Encoding::UTF8)),
                 _ => Some(SgfToken::Charset(Encoding::Other(value.to_string()))),
+            },
+            "OB" => match value.parse::<u32>() {
+                Ok(n) => Some(SgfToken::MovesRemaining {
+                    color: Color::Black,
+                    moves: n,
+                }),
+                Err(_) => Some(SgfToken::Invalid((
+                    base_ident.to_string(),
+                    value.to_string(),
+                ))),
+            },
+            "OW" => match value.parse::<u32>() {
+                Ok(n) => Some(SgfToken::MovesRemaining {
+                    color: Color::White,
+                    moves: n,
+                }),
+                Err(_) => Some(SgfToken::Invalid((
+                    base_ident.to_string(),
+                    value.to_string(),
+                ))),
             },
             _ => Some(SgfToken::Unknown((
                 base_ident.to_string(),
@@ -407,7 +428,16 @@ impl Into<String> for &SgfToken {
                     Encoding::Other(e) => e,
                 }
             ),
-            _ => panic!(),
+            SgfToken::MovesRemaining { color, moves } => format!(
+                "O{}[{}]",
+                match color {
+                    Color::Black => 'B',
+                    Color::White => 'W',
+                },
+                moves
+            ),
+            SgfToken::Unknown((ident, prop)) => format!("{}[{}]", ident, prop),
+            SgfToken::Invalid((ident, prop)) => format!("{}[{}]", ident, prop),
         }
     }
 }
