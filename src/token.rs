@@ -107,14 +107,35 @@ pub enum Encoding {
     Other(String),
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum DisplayNodes {
+    Children,
+    Siblings,
+}
+
 /// Enum describing all possible SGF Properties
 #[derive(Debug, PartialEq, Clone)]
 pub enum SgfToken {
-    Add { color: Color, coordinate: (u8, u8) },
-    Move { color: Color, action: Action },
-    Time { color: Color, time: u32 },
-    PlayerName { color: Color, name: String },
-    PlayerRank { color: Color, rank: String },
+    Add {
+        color: Color,
+        coordinate: (u8, u8),
+    },
+    Move {
+        color: Color,
+        action: Action,
+    },
+    Time {
+        color: Color,
+        time: u32,
+    },
+    PlayerName {
+        color: Color,
+        name: String,
+    },
+    PlayerRank {
+        color: Color,
+        rank: String,
+    },
     Game(Game),
     Rule(RuleSet),
     Result(Outcome),
@@ -122,21 +143,38 @@ pub enum SgfToken {
     Event(String),
     Copyright(String),
     GameName(String),
+    VariationDisplay {
+        nodes: DisplayNodes,
+        on_board_display: bool,
+    },
     Place(String),
     Date(String),
     Size(u32, u32),
     Overtime(String),
     TimeLimit(u32),
-    MovesRemaining { color: Color, moves: u32 },
+    MovesRemaining {
+        color: Color,
+        moves: u32,
+    },
     Handicap(u32),
     Comment(String),
     Charset(Encoding),
-    Application { name: String, version: String },
+    Application {
+        name: String,
+        version: String,
+    },
     Unknown((String, String)),
     Invalid((String, String)),
-    Square { coordinate: (u8, u8) },
-    Triangle { coordinate: (u8, u8) },
-    Label { label: String, coordinate: (u8, u8) },
+    Square {
+        coordinate: (u8, u8),
+    },
+    Triangle {
+        coordinate: (u8, u8),
+    },
+    Label {
+        label: String,
+        coordinate: (u8, u8),
+    },
 }
 
 impl SgfToken {
@@ -286,6 +324,12 @@ impl SgfToken {
             "AP" => parse_application_str(value)
                 .ok()
                 .map(|(name, version)| SgfToken::Application { name, version }),
+            "ST" => parse_variation_display_str(value)
+                .ok()
+                .map(|(nodes, on_board_display)| SgfToken::VariationDisplay {
+                    nodes,
+                    on_board_display,
+                }),
             _ => Some(SgfToken::Unknown((
                 base_ident.to_string(),
                 value.to_string(),
@@ -443,6 +487,18 @@ impl Into<String> for &SgfToken {
                 },
                 moves
             ),
+            SgfToken::VariationDisplay {
+                nodes,
+                on_board_display,
+            } => {
+                let num = match (nodes, on_board_display) {
+                    (DisplayNodes::Children, true) => 0,
+                    (DisplayNodes::Siblings, true) => 1,
+                    (DisplayNodes::Children, false) => 2,
+                    (DisplayNodes::Siblings, false) => 3,
+                };
+                format!("ST[{}]", num)
+            }
             SgfToken::Application { name, version } => format!("AP[{}:{}]", name, version),
             SgfToken::Unknown((ident, prop)) => format!("{}[{}]", ident, prop),
             SgfToken::Invalid((ident, prop)) => format!("{}[{}]", ident, prop),
@@ -479,6 +535,16 @@ fn split_label_text(input: &str) -> Option<(&str, &str)> {
         Some(input.split_at(2))
     } else {
         None
+    }
+}
+
+fn parse_variation_display_str(input: &str) -> Result<(DisplayNodes, bool), SgfError> {
+    match input.parse::<u8>() {
+        Ok(0) => Ok((DisplayNodes::Children, true)),
+        Ok(1) => Ok((DisplayNodes::Siblings, true)),
+        Ok(2) => Ok((DisplayNodes::Children, false)),
+        Ok(3) => Ok((DisplayNodes::Siblings, false)),
+        _ => Err(SgfError::from(SgfErrorKind::ParseError)),
     }
 }
 

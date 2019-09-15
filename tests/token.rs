@@ -402,4 +402,51 @@ mod token_tests {
         let string_token: String = token.into();
         assert_eq!(string_token, "OT[15/300 Canadian]");
     }
+
+    #[test]
+    fn can_parse_variation_display_token() {
+        let token_3 = SgfToken::from_pair("ST", "3");
+        assert_eq!(
+            token_3,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Siblings,
+                on_board_display: false
+            }
+        );
+        let string_token_3: String = token_3.into();
+        assert_eq!(string_token_3, "ST[3]");
+
+        let token_2 = SgfToken::from_pair("ST", "2");
+        assert_eq!(
+            token_2,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Children,
+                on_board_display: false
+            }
+        );
+        let string_token_2: String = token_2.into();
+        assert_eq!(string_token_2, "ST[2]");
+
+        let token_1 = SgfToken::from_pair("ST", "1");
+        assert_eq!(
+            token_1,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Siblings,
+                on_board_display: true
+            }
+        );
+        let string_token_1: String = token_1.into();
+        assert_eq!(string_token_1, "ST[1]");
+
+        let token_0 = SgfToken::from_pair("ST", "0");
+        assert_eq!(
+            token_0,
+            SgfToken::VariationDisplay {
+                nodes: DisplayNodes::Children,
+                on_board_display: true
+            }
+        );
+        let string_token_0: String = token_0.into();
+        assert_eq!(string_token_0, "ST[0]");
+    }
 }
