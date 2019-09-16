@@ -354,16 +354,76 @@ impl SgfToken {
     /// ```
     /// use sgf_parser::*;
     ///
-    /// let token = SgfToken::from_pair("B", "aa");
-    /// assert!(!token.is_root_token());
-    ///
     /// let token = SgfToken::from_pair("SZ", "19");
     /// assert!(token.is_root_token());
+    ///
+    /// let token = SgfToken::from_pair("B", "aa");
+    /// assert!(!token.is_root_token());
     /// ```
     pub fn is_root_token(&self) -> bool {
         use SgfToken::*;
         match self {
-            Size(_, _) => true,
+            Size(_, _)
+            | Charset(_)
+            | FileFormat(_)
+            | Game(_)
+            | VariationDisplay { .. }
+            | Application { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Checks if the token is a setup token as defined by the SGF spec.
+    ///
+    /// Setup tokens modify the current position, and should not be on the same node as move tokens
+    ///
+    /// ```
+    /// use sgf_parser::*;
+    ///
+    /// let token = SgfToken::from_pair("AB", "aa");
+    /// assert!(token.is_setup_token());
+    ///
+    /// let token = SgfToken::from_pair("SZ", "19");
+    /// assert!(!token.is_setup_token());
+    /// ```
+    pub fn is_setup_token(&self) -> bool {
+        use SgfToken::*;
+        match self {
+            Add { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Checks if the token is a game info token as defined by the SGF spec.
+    ///
+    /// Game info tokens provide some information about the game played, usually stored in the root
+    /// node
+    ///
+    /// ```
+    /// use sgf_parser::*;
+    ///
+    /// let token = SgfToken::from_pair("RE", "W+T");
+    /// assert!(token.is_game_info_token());
+    ///
+    /// let token = SgfToken::from_pair("SZ", "19");
+    /// assert!(!token.is_game_info_token());
+    /// ```
+    pub fn is_game_info_token(&self) -> bool {
+        use SgfToken::*;
+        match self {
+            Date(_)
+            | GameName(_)
+            | Handicap(_)
+            | Komi(_)
+            | Overtime(_)
+            | Event(_)
+            | Result(_)
+            | Rule(_)
+            | Place(_)
+            | TimeLimit(_)
+            | PlayerName { .. }
+            | PlayerRank { .. }
+            | Copyright(_) => true,
             _ => false,
         }
     }
