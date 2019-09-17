@@ -94,4 +94,97 @@ mod tree_tests {
             "(;PB[black]PW[white];B[cc];W[pp](;B[dp])(;B[pd]))"
         );
     }
+
+    #[test]
+    fn can_validate_valid_game_tree() {
+        let tree = GameTree {
+            nodes: vec![
+                GameNode {
+                    tokens: vec![
+                        SgfToken::PlayerName {
+                            color: Color::Black,
+                            name: "black".to_string(),
+                        },
+                        SgfToken::PlayerName {
+                            color: Color::White,
+                            name: "white".to_string(),
+                        },
+                        SgfToken::Size(19, 19),
+                    ],
+                },
+                GameNode {
+                    tokens: vec![SgfToken::Move {
+                        color: Color::Black,
+                        action: Move(3, 3),
+                    }],
+                },
+                GameNode {
+                    tokens: vec![SgfToken::Move {
+                        color: Color::White,
+                        action: Move(16, 16),
+                    }],
+                },
+            ],
+            variations: vec![],
+        };
+        assert!(tree.is_valid());
+    }
+
+    #[test]
+    fn can_invalidate_invalid_main_varation() {
+        let tree = GameTree {
+            nodes: vec![
+                GameNode {
+                    tokens: vec![
+                        SgfToken::PlayerName {
+                            color: Color::Black,
+                            name: "black".to_string(),
+                        },
+                        SgfToken::PlayerName {
+                            color: Color::White,
+                            name: "white".to_string(),
+                        },
+                    ],
+                },
+                GameNode {
+                    tokens: vec![SgfToken::Move {
+                        color: Color::Black,
+                        action: Move(3, 3),
+                    }],
+                },
+                GameNode {
+                    tokens: vec![
+                        SgfToken::Move {
+                            color: Color::White,
+                            action: Move(16, 16),
+                        },
+                        SgfToken::Size(19, 19),
+                    ],
+                },
+            ],
+            variations: vec![],
+        };
+        assert!(!tree.is_valid());
+    }
+
+    #[test]
+    fn single_node_tree_is_valid() {
+        let tree = GameTree {
+            nodes: vec![GameNode {
+                tokens: vec![
+                    SgfToken::PlayerName {
+                        color: Color::Black,
+                        name: "black".to_string(),
+                    },
+                    SgfToken::PlayerName {
+                        color: Color::White,
+                        name: "white".to_string(),
+                    },
+                    SgfToken::Size(19, 19),
+                ],
+            }],
+            variations: vec![],
+        };
+        assert!(tree.is_valid());
+    }
 }
