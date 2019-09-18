@@ -4,6 +4,29 @@ mod token_tests {
     use sgf_parser::*;
 
     #[test]
+    fn can_check_token_type() {
+        let normal_token = SgfToken::from_pair("B", "aa");
+        assert!(!normal_token.is_game_info_token());
+        assert!(!normal_token.is_setup_token());
+        assert!(!normal_token.is_root_token());
+
+        let root_token = SgfToken::from_pair("CA", "UTF-8");
+        assert!(!root_token.is_game_info_token());
+        assert!(!root_token.is_setup_token());
+        assert!(root_token.is_root_token());
+
+        let setup_token = SgfToken::from_pair("AB", "cd");
+        assert!(!setup_token.is_game_info_token());
+        assert!(setup_token.is_setup_token());
+        assert!(!setup_token.is_root_token());
+
+        let game_info_token = SgfToken::from_pair("RE", "W+T");
+        assert!(game_info_token.is_game_info_token());
+        assert!(!game_info_token.is_setup_token());
+        assert!(!game_info_token.is_root_token());
+    }
+
+    #[test]
     fn can_parse_move_tokens() {
         let token = SgfToken::from_pair("B", "aa");
         assert_eq!(

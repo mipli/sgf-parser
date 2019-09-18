@@ -1,7 +1,7 @@
 use crate::{GameNode, SgfError, SgfErrorKind, SgfToken};
 
 /// A game tree, containing it's nodes and possible variations following the last node
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GameTree {
     pub nodes: Vec<GameNode>,
     pub variations: Vec<GameTree>,
@@ -152,6 +152,47 @@ impl GameTree {
     /// ```
     pub fn iter(&self) -> GameTreeIterator<'_> {
         GameTreeIterator::new(self)
+    }
+
+    /// Checks if the tree is valid. `self` is assumed to be a root tree, so it can contain
+    /// root tokens in it's first node.
+    ///
+    /// The only way to invalidate a GameTree is to have a root token in a non-root node.
+    /// The provided `parse` function will not generate invalid a `GameTree`, but manual creation
+    /// or modification of a game tree can create an invalid state
+    ///
+    /// `SgfToken::Invalid` and `SgfToken::Unknown` does not invalidate the tree
+    ///
+    /// ```rust
+    /// use sgf_parser::*;
+    ///
+    /// let valid_tree: GameTree = parse("(;SZ[19]B[dc];W[ef](;B[aa])(;B[cc];W[ee]))").unwrap();
+    /// assert!(valid_tree.is_valid());
+    ///
+    /// let mut invalid_tree: GameTree = valid_tree.clone();
+    /// invalid_tree.variations[1].nodes[0].tokens.push(SgfToken::from_pair("SZ", "19"));
+    ///
+    /// assert!(!invalid_tree.is_valid());
+    /// ```
+    pub fn is_valid(&self) -> bool {
+        let validate_nodes = |nodes: &[GameNode]| {
+            nodes
+                .iter()
+                .all(|node| node.tokens.iter().all(|t| !t.is_root_token()))
+        };
+        if !validate_nodes(&self.nodes[1..]) {
+            return false;
+        }
+
+        let mut trees: Vec<&GameTree> = vec![];
+        trees.extend(self.variations.iter());
+        while let Some(tree) = trees.pop() {
+            if !validate_nodes(&tree.nodes) {
+                return false;
+            }
+            trees.extend(tree.variations.iter());
+        }
+        true
     }
 }
 
