@@ -5,6 +5,9 @@
 
 A [SGF](https://www.red-bean.com/sgf/index.html) Parser for Rust. Supports all SGF properties, and tree branching.
 
+**NOTE** when converting a `GameTree` to a string we convert all charset tokens to be UTF-8, since
+that is the encoding for all strings in Rust.
+
 Using `pest` for the actual parsing part.
 
 # Development

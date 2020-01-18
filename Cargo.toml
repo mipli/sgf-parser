@@ -11,6 +11,6 @@ readme = "README.md"
 keywords = ["parser", "sgf", "go", "baduk", "weiqi"]
 
 [dependencies]
-pest = "2.1.0"
-pest_derive = "2.1.0"
-derive_more = "0.15.0"
+pest = "^2.1.0"
+pest_derive = "^2.1.0"
+derive_more = "^0.99.2"

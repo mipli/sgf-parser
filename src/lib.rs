@@ -4,6 +4,8 @@
 //!
 //! Using `pest` for the actual parsing part.
 //!
+//! NOTE: when converting a `GameTree` to a string we convert all charset tokens to be UTF-8, since
+//! that is the encoding for all strings in Rust.
 //!
 //! # Example usage
 //! ```rust
