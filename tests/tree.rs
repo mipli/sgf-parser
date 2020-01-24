@@ -187,4 +187,28 @@ mod tree_tests {
         };
         assert!(tree.is_valid());
     }
+
+    #[test]
+    fn charset_converted_to_utf8_on_string_conversion() {
+        let tree = GameTree {
+            nodes: vec![GameNode {
+                tokens: vec![
+                    SgfToken::Charset(Encoding::Other("ISO-8859".to_string())),
+                    SgfToken::PlayerName {
+                        color: Color::Black,
+                        name: "black".to_string(),
+                    },
+                    SgfToken::PlayerName {
+                        color: Color::White,
+                        name: "white".to_string(),
+                    },
+                    SgfToken::Size(19, 19),
+                ],
+            }],
+            variations: vec![],
+        };
+        let output: String = tree.into();
+
+        assert_eq!(output, "(;CA[UTF-8]PB[black]PW[white]SZ[19])");
+    }
 }

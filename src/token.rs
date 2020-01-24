@@ -538,13 +538,7 @@ impl Into<String> for &SgfToken {
                     Game::Other(n) => n,
                 }
             ),
-            SgfToken::Charset(encoding) => format!(
-                "CA[{}]",
-                match encoding {
-                    Encoding::UTF8 => "UTF-8",
-                    Encoding::Other(e) => e,
-                }
-            ),
+            SgfToken::Charset(_) => "CA[UTF-8]".to_string(),
             SgfToken::MovesRemaining { color, moves } => format!(
                 "O{}[{}]",
                 match color {
