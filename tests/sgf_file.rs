@@ -41,4 +41,9 @@ mod sgf_files_test {
             _ => false,
         })
     }
+
+    #[test]
+    fn parse_sgf_with_empty_node() {
+        let _g = sgf_parser::parse(include_str!("sgf/empty_node.sgf")).unwrap();
+    }
 }

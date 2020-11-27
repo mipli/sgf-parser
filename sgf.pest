@@ -2,7 +2,7 @@ WHITESPACE = _{ " " | NEWLINE}
 
 game_tree = { "(" ~ sequence? ~ game_tree* ~ ")"}
 sequence = { node{1,} }
-node = { ";" ~ property+ }
+node = { ";" ~ property* }
 property = { property_identifier ~ property_value+ }
 property_identifier = { ('A'..'Z' | 'a'..'z')+ }
 property_value = ${ "[" ~ inner ~ "]" }
