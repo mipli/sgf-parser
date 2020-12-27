@@ -11,10 +11,7 @@ impl GameNode {
     pub fn get_unknown_tokens(&self) -> Vec<&SgfToken> {
         self.tokens
             .iter()
-            .filter(|token| match token {
-                SgfToken::Unknown(_) => true,
-                _ => false,
-            })
+            .filter(|token| matches!(token, SgfToken::Unknown(_)))
             .collect()
     }
 
@@ -22,10 +19,7 @@ impl GameNode {
     pub fn get_invalid_tokens(&self) -> Vec<&SgfToken> {
         self.tokens
             .iter()
-            .filter(|token| match token {
-                SgfToken::Invalid(_) => true,
-                _ => false,
-            })
+            .filter(|token| matches!(token, SgfToken::Invalid(_)))
             .collect()
     }
 }

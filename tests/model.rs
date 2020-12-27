@@ -6,6 +6,7 @@ mod model_tests {
     #[test]
     fn can_get_unknown_nodes() {
         let tree: GameTree = parse("(;B[dc];W[ef]AC[23](;B[dd])(;AS[234]))").unwrap();
+        println!("{:#?}", tree);
         let unknowns = tree.get_unknown_nodes();
         assert_eq!(unknowns.len(), 2);
         assert_eq!(

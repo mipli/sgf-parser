@@ -54,10 +54,9 @@ impl GameTree {
             .nodes
             .iter()
             .filter(|node| {
-                node.tokens.iter().any(|t| match t {
-                    SgfToken::Unknown(_) => true,
-                    _ => false,
-                })
+                node.tokens
+                    .iter()
+                    .any(|t| matches!(t, SgfToken::Unknown(_)))
             })
             .collect::<Vec<_>>();
         self.variations.iter().for_each(|variation| {
@@ -89,10 +88,9 @@ impl GameTree {
             .nodes
             .iter()
             .filter(|node| {
-                node.tokens.iter().any(|t| match t {
-                    SgfToken::Invalid(_) => true,
-                    _ => false,
-                })
+                node.tokens
+                    .iter()
+                    .any(|t| matches!(t, SgfToken::Invalid(_)))
             })
             .collect::<Vec<_>>();
         self.variations.iter().for_each(|variation| {
