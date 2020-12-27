@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/mipli/sgf-parser.svg?branch=master)](https://travis-ci.com/mipli/sgf-parser)
 [![Crate](https://img.shields.io/crates/v/sgf-parser.svg)](https://crates.io/crates/sgf-parser)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/sgf-parser/latest/sgf_parser/)
 
 # SGF Parser
 
