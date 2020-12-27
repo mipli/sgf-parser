@@ -1,6 +1,6 @@
 [package]
 name = "sgf-parser"
-version = "2.4.0"
+version = "2.5.0"
 authors = ["Michael A. Plikk <michael@plikk.com>"]
 edition = "2018"
 license = "MIT"
