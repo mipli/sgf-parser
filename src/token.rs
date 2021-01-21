@@ -362,13 +362,15 @@ impl SgfToken {
     /// ```
     pub fn is_root_token(&self) -> bool {
         use SgfToken::*;
-        matches!(self,
+        matches!(
+            self,
             Size(_, _)
-            | Charset(_)
-            | FileFormat(_)
-            | Game(_)
-            | VariationDisplay { .. }
-            | Application { .. })
+                | Charset(_)
+                | FileFormat(_)
+                | Game(_)
+                | VariationDisplay { .. }
+                | Application { .. }
+        )
     }
 
     /// Checks if the token is a setup token as defined by the SGF spec.
@@ -405,20 +407,22 @@ impl SgfToken {
     /// ```
     pub fn is_game_info_token(&self) -> bool {
         use SgfToken::*;
-        matches!(self,
+        matches!(
+            self,
             Date(_)
-            | GameName(_)
-            | Handicap(_)
-            | Komi(_)
-            | Overtime(_)
-            | Event(_)
-            | Result(_)
-            | Rule(_)
-            | Place(_)
-            | TimeLimit(_)
-            | PlayerName { .. }
-            | PlayerRank { .. }
-            | Copyright(_))
+                | GameName(_)
+                | Handicap(_)
+                | Komi(_)
+                | Overtime(_)
+                | Event(_)
+                | Result(_)
+                | Rule(_)
+                | Place(_)
+                | TimeLimit(_)
+                | PlayerName { .. }
+                | PlayerRank { .. }
+                | Copyright(_)
+        )
     }
 }
 
