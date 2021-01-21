@@ -576,8 +576,12 @@ fn split_size_text(input: &str) -> Option<(u32, u32)> {
 
 /// Converts goban coordinates to string representation
 fn coordinate_to_str(coordinate: (u8, u8)) -> String {
-    let x = (coordinate.0 + 96) as char;
-    let y = (coordinate.1 + 96) as char;
+    fn to_char(c: u8) -> char {
+        (c + if c < 27 { 96 } else { 38 }) as char
+    }
+
+    let x = to_char(coordinate.0);
+    let y = to_char(coordinate.1);
 
     format!("{}{}", x, y)
 }
@@ -676,7 +680,6 @@ fn str_to_coordinates(input: &str) -> Result<(u8, u8), SgfError> {
         Err(SgfErrorKind::ParseError.into())
     } else {
         let coords = input
-            .to_lowercase()
             .as_bytes()
             .iter()
             .map(|c| convert_u8_to_coordinate(*c))
@@ -689,5 +692,9 @@ fn str_to_coordinates(input: &str) -> Result<(u8, u8), SgfError> {
 ///
 #[inline]
 fn convert_u8_to_coordinate(c: u8) -> u8 {
-    c - 96
+    if c > 96 {
+        c - 96
+    } else {
+        c - 38
+    }
 }

@@ -52,6 +52,31 @@ mod token_tests {
     }
 
     #[test]
+    fn can_parse_uppercase_move_tokens() {
+        let token = SgfToken::from_pair("B", "AA");
+        assert_eq!(
+            token,
+            SgfToken::Move {
+                color: Color::Black,
+                action: Move(27, 27),
+            }
+        );
+        let string_token: String = token.into();
+        assert_eq!(string_token, "B[AA]");
+
+        let token = SgfToken::from_pair("W", "KK");
+        assert_eq!(
+            token,
+            SgfToken::Move {
+                color: Color::White,
+                action: Move(37, 37),
+            }
+        );
+        let string_token: String = token.into();
+        assert_eq!(string_token, "W[KK]");
+    }
+
+    #[test]
     fn can_parse_result_tokens() {
         assert_eq!(
             SgfToken::from_pair("RE", "B+R"),
